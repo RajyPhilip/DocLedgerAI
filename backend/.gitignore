@@ -1,0 +1,7 @@
+# Environment files
+.env
+.env.development
+.env.production
+
+# Node
+node_modules
