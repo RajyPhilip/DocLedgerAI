@@ -7,14 +7,23 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.13.2",
+    "js-cookie": "^3.0.5",
+    "lottie-react": "^2.4.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-router-dom": "^7.11.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "react-toastify": "^11.0.5",
+    "rxjs": "^7.8.2",
+    "sass": "^1.97.1",
+    "web-vitals": "^2.1.4",
+    "zustand": "^5.0.9"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "dev": "react-scripts start",
     "build": "react-scripts build",
+    "prod": "serve -s build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
