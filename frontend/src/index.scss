@@ -46,3 +46,16 @@ code {
   line-height: 15px;
   font-weight: 400;
 }
+
+.main-page-content {
+  /* Hide scrollbar for Chrome, Edge, Safari */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+
+  /* Hide scrollbar for IE / old Edge */
+  -ms-overflow-style: none;
+}

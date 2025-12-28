@@ -48,7 +48,7 @@ const ActiveRoutes = () => {
               path="/notfound"
               element={<div>PAGE NOT FOUND</div>}
             />
-            <Route path="*" element={<Navigate to="/profile" replace />} />
+            <Route path="*" element={<Navigate to="/documents" replace />} />
           </Routes>
         </div>
       ) : (

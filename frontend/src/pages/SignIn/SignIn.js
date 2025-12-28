@@ -56,7 +56,7 @@ const SignIn = () => {
 
       setCookie(JWT_TOKEN, data.token);
 
-      navigate("/tournnament");
+      navigate("/documents");
     } catch (error) {
       console.error("Error sending data:", error);
     } finally {

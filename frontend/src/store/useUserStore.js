@@ -1,19 +1,25 @@
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 
 const useUserStore = create(
   devtools(
-    (set) => ({
-      user: null,
+    persist(
+      (set) => ({
+        user: null,
 
-      setUser: (user) =>
-        set({ user }, false, "user/setUser"),
+        setUser: (user) =>
+          set({ user }, false, "user/setUser"),
 
-      logout: () =>
-        set({ user: null }, false, "user/logout"),
-    }),
+        logout: () =>
+          set({ user: null }, false, "user/logout"),
+      }),
+      {
+        name: "user-storage", // 🔐 localStorage key
+        partialize: (state) => ({ user: state.user }), // only persist user
+      }
+    ),
     {
-      name: "UserStore", 
+      name: "UserStore",
     }
   )
 );
