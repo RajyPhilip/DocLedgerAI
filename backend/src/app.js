@@ -9,10 +9,7 @@ const app = express();
 
 const CLIENT_URL = process.env.CLIENT_URL;
 
-// 🔴 Add this log ONCE to confirm
-console.log("CORS allowed origin:", CLIENT_URL);
-
-// ✅ CORS (NO wildcard, NO hardcoding)
+// CORS (NO wildcard, NO hardcoding)
 app.use(
   cors({
     origin: CLIENT_URL,
@@ -22,7 +19,8 @@ app.use(
 
 app.use(express.json());
 
-// ✅ routes
+// routes
 app.use("/auth", authRoutes);
+app.use("/documents", require("./routes/documents.routes"));
 
 module.exports = app;
