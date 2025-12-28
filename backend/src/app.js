@@ -1,11 +1,28 @@
-const express = require("express");
+require("dotenv").config({ path: ".env.development" });
 
-const healthRoutes = require("./routes/health.route");
+const express = require("express");
+const cors = require("cors");
+
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
+const CLIENT_URL = process.env.CLIENT_URL;
+
+// 🔴 Add this log ONCE to confirm
+console.log("CORS allowed origin:", CLIENT_URL);
+
+// ✅ CORS (NO wildcard, NO hardcoding)
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-app.use("/health", healthRoutes);
+// ✅ routes
+app.use("/auth", authRoutes);
 
 module.exports = app;

@@ -15,6 +15,20 @@
       "when": 1766869101435,
       "tag": "0001_glamorous_aaron_stack",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766882862758,
+      "tag": "0002_talented_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766887096198,
+      "tag": "0003_wise_puck",
+      "breakpoints": true
     }
   ]
 }

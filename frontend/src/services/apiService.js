@@ -2,11 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { JWT_TOKEN, getCookie } from "./cookieService";
 import { Subject } from "rxjs";
 
-const BASE_URL = "http://localhost:3000/";
-
-const VERSONING = "api/v1";
-
-const API_URL = `${BASE_URL}${VERSONING}`;
+const API_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Created a Singleton Api Service class all apis intercepted here to connect to backend
 const ApiService = (() => {

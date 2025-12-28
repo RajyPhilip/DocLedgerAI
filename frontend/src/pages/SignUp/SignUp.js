@@ -14,29 +14,37 @@ const Signup = () => {
 
   const [breakpoint, setBreakpoint] = useState("");
   const [validForm, setValidForm] = useState(false);
+  const [mobileTouched, setMobileTouched] = useState(false);
+  const [mobileError, setMobileError] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    fullName: "",
+    name: "",
     mobileNumber: "",
-    position: "",
   });
 
   useEffect(() => {
     breakPointObserver(setBreakpoint);
   }, []);
 
-  useEffect(() => {
-    setValidForm(
-      Object.values(formData).every((value) => value !== "")
-    );
-  }, [formData]);
+useEffect(() => {
+  setValidForm(
+    Object.values(formData).every((value) => value !== "") &&
+    mobileError === ""
+  );
+}, [formData, mobileError]);
 
-  const inputChangeHandler = (event) => {
-    const { id, value } = event.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
+ const inputChangeHandler = (event) => {
+  const { id, value } = event.target;
+
+  setFormData((prev) => ({ ...prev, [id]: value }));
+
+  if (id === "mobileNumber") {
+    validateMobileNumber(value);
+  }
+};
+
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -48,9 +56,8 @@ const Signup = () => {
       const payload = {
         email: formData.email,
         password: formData.password,
-        name: formData.fullName,
+        name: formData.name,
         mobile_number: Number(formData.mobileNumber),
-        position: formData.position,
       };
 
       const response = await api.client.post("/auth/signup", payload);
@@ -70,13 +77,27 @@ const Signup = () => {
     }
   };
 
+  const validateMobileNumber = (value) => {
+  if (value.length === 0) {
+    setMobileError("");
+    return;
+  }
+
+  if (value.length !== 10) {
+    setMobileError("Please enter a valid 10-digit phone number");
+  } else {
+    setMobileError("");
+  }
+};
+
+
   return (
     <div className="signup">
       <div className="signup-left flex-column align-items-center">
         <div className="center-signup-content">
           <form
             onSubmit={onSubmitHandler}
-            className="signup-form flex-column gap-8"
+            className="signup-form flex-column gap-8 justify-content-center full-height"
           >
             <FormInput
               id="email"
@@ -92,46 +113,50 @@ const Signup = () => {
               inputChangeHandler={inputChangeHandler}
             />
             <FormInput
-              id="fullName"
+              id="name"
               placeholder="Full Name"
-              value={formData.fullName}
+              value={formData.name}
               inputChangeHandler={inputChangeHandler}
             />
-            <FormInput
-              id="mobileNumber"
-              placeholder="Mobile Number"
-              value={formData.mobileNumber}
-              inputChangeHandler={inputChangeHandler}
-            />
-            <FormInput
-              id="position"
-              placeholder="Position You Play"
-              value={formData.position}
-              inputChangeHandler={inputChangeHandler}
-            />
+           <FormInput
+  type="number"
+  id="mobileNumber"
+  placeholder="Mobile Number"
+  value={formData.mobileNumber}
+  inputChangeHandler={inputChangeHandler}
+  onBlur={() => {
+    setMobileTouched(true);
+    validateMobileNumber(formData.mobileNumber);
+  }}
+/>
+
+{mobileTouched && mobileError ? (
+  <p className="xetgo-font-mini error-text flex-row align-items-center justify-content-center">{mobileError}</p>
+) : <p></p>}
 
             <button
               type="submit"
               disabled={!validForm}
-              className={`sign-up-btn ${
+              className={`sign-up-btn p-8 ${
                 validForm ? "valid-form" : ""
               }`}
             >
-              Continue
+              SignUp
             </button>
 
-            <p className="xetgo-font-tag">
-              Already have an account?{" "}
+            <p className="xetgo-font-tag flex-row align-items-center justify-content-center gap-2">
+              <span>Already have an account ?{"  "}</span>
               <span
                 className="active-sign-in-link cursor-pointer"
                 onClick={() => navigate("/signin")}
               >
-                Sign In
+                {"  "} Sign In
               </span>
             </p>
           </form>
         </div>
       </div>
+      <div className="signup-right"></div>
     </div>
   );
 };

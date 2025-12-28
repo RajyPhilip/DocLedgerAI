@@ -19,6 +19,10 @@
         gap: 8px;
       }
 
+      .error-text {
+        color: red;
+      }
+
       .sign-up-btn {
         margin-top: 8px;
         border-radius: 8px;
@@ -69,7 +73,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-image: url("https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109094433-openart-image_t2OEw-gd_1736415771720_raw.jpg");
+    background-image: url("https://docparser.com/wp-content/uploads/2024/04/pdf-parser.jpg");
     background-size: cover;
     background-position: center;
   }
@@ -79,10 +83,11 @@
 
 @media screen and (max-width: 768px) {
   .signup {
+
     .signup-left {
       width: 100%;
       height: 100%;
-      background: url("https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109095040-openart-image_NzZfP4kP_1736416187321_raw.jpg")
+      background: url("https://docparser.com/wp-content/uploads/2024/04/pdf-parser.jpg")
         center;
       background-size: cover;
 
@@ -96,7 +101,7 @@
         margin: auto;
         padding: 32px 24px;
         flex: none;
-        height: 742px;
+        // height: 742px;
         min-height: unset;
         max-height: unset;
         box-sizing: border-box;
@@ -105,6 +110,10 @@
     .signup-right {
       display: none;
     }
+  }
+
+  .signup::-webkit-scrollbar{
+    display: none;
   }
 }
 
@@ -124,7 +133,7 @@
         padding: 24px 16px;
         margin: 0px;
         width: 100%;
-        background: url("https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109100703-openart-image_gUSEGAUu_1736417179432_raw.jpg")
+        background: url("https://img.freepik.com/free-vector/simple-blue-gradient-background-vector-business_53876-171631.jpg?semt=ais_hybrid&w=740&q=80")
           no-repeat right;
         background-size: cover;
 
