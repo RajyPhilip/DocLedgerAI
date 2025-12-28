@@ -1,26 +1,19 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 
 const useUserStore = create(
-  persist(
+  devtools(
     (set) => ({
       user: null,
-      isAuthenticated: false,
 
       setUser: (user) =>
-        set({
-          user,
-          isAuthenticated: true,
-        }),
+        set({ user }, false, "user/setUser"),
 
       logout: () =>
-        set({
-          user: null,
-          isAuthenticated: false,
-        }),
+        set({ user: null }, false, "user/logout"),
     }),
     {
-      name: "auth-storage",
+      name: "UserStore", 
     }
   )
 );

@@ -73,13 +73,8 @@ const SignIn = () => {
             style={{ width: "100%" }}
           >
             {breakpoint !== ScreenSizes.MOBILE && (
-              <span className="signin-header flex-column">
-                <img
-                  src="https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109103622-Screenshot_2025-01-09_at_4.03.22_PM-removebg.png"
-                  alt="logo"
-                  height="40px"
-                />
-              </span>
+          
+                <a  className="logo-footer-mobile" href="https://imgbb.com/"><img style={{marginLeft:'-32px'}} height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></a>
             )}
 
             <span className="signin-description flex-column gap-4">
@@ -125,15 +120,11 @@ const SignIn = () => {
           </span>
 
           <span className="go-to-signup xetgo-font-button-bold">
-            <img
-              className="logo-footer-mobile"
-              src="https://d2k6zobmg5lufr.cloudfront.net/assets%2F20240129094742-xetgo_horizontal-1+2.svg"
-              alt="logo"
-              height="40px"
-            />
+
+            <a  className="logo-footer-mobile" href="https://imgbb.com/"><img height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></a>
 
             <span className="footer-signup flex-row align-items-center gap-4 xetgo-font-button">
-              <span style={{ color: "#A5A5A5" }}> New to Athletic 360? </span>
+              <span style={{ color: "#A5A5A5" }}> New to DocLedger AI? </span>
               <span
                 style={{ color: "#5151EC", cursor: "pointer" }}
                 onClick={() => navigate("/signup")}

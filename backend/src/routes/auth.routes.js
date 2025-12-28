@@ -11,7 +11,7 @@ router.post("/signup", async (req, res) => {
   try {
     const { email, password, name, mobile_number } = req.body;
 
-    // 1️⃣ Validate input
+    // 1 Validate input
     if (!email || !password || !name) {
       return res.status(400).json({
         status: "error",
@@ -19,7 +19,7 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // 2️⃣ Check if user already exists
+    // 2 Check if user already exists
     const existingUser = await db
       .select()
       .from(users)
@@ -32,10 +32,10 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    // 3️⃣ Hash password
+    // 3️ Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 4️⃣ Insert user
+    // 4 Insert user
     const [newUser] = await db
       .insert(users)
       .values({
@@ -51,13 +51,13 @@ router.post("/signup", async (req, res) => {
         mobile_number: users.mobileNumber,
       });
 
-    // 5️⃣ Create JWT
+    // 5 Create JWT
     const token = signToken({
       userId: newUser.id,
       email: newUser.email,
     });
 
-    // 6️⃣ Send response (MATCHES FRONTEND EXPECTATION)
+    // 6 Send response (MATCHES FRONTEND EXPECTATION)
     return res.status(201).json({
       status: "success",
       data: {
@@ -67,6 +67,77 @@ router.post("/signup", async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1 Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        status: "error",
+        message: "Email and password are required",
+      });
+    }
+
+    // 2 Find user by email
+    const [user] = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        passwordHash: users.passwordHash,
+        mobile_number: users.mobileNumber,
+      })
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
+
+    // 3️ Compare password
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
+
+    // 4️ Generate JWT
+    const token = signToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    // 5️ Remove password before sending response
+    delete user.passwordHash;
+
+    // 6️ Send response (same shape as signup)
+    return res.json({
+      status: "success",
+      data: {
+        token,
+        user,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+
     return res.status(500).json({
       status: "error",
       message: "Internal server error",

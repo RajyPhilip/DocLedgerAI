@@ -64,12 +64,12 @@ useEffect(() => {
 
       const { token, user } = response.data.data;
 
-      // 🔐 persist auth
+      // persist auth
       setCookie(JWT_TOKEN, token);
       setUser(user);
 
       toast.success("Account created successfully!");
-      navigate("/dashboard");
+      navigate("/documents");
     } catch (error) {
       toast.error(
         error?.response?.data?.message || "Signup failed"
@@ -131,8 +131,8 @@ useEffect(() => {
 />
 
 {mobileTouched && mobileError ? (
-  <p className="xetgo-font-mini error-text flex-row align-items-center justify-content-center">{mobileError}</p>
-) : <p></p>}
+  <p style={{height:'12px'}} className="xetgo-font-mini error-text flex-row align-items-center justify-content-center">{mobileError}</p>
+) : <p style={{height:'12px'}}></p>}
 
             <button
               type="submit"
