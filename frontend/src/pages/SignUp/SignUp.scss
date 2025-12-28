@@ -1,0 +1,190 @@
+.signup {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+
+  .signup-left {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .left-upper-container-signup {
+      width: 364px;
+    }
+    .signup-form {
+      width: 364px;
+
+      .sign-up-bottom-content {
+        gap: 8px;
+      }
+
+      .sign-up-btn {
+        margin-top: 8px;
+        border-radius: 8px;
+        background-color: #8e8ce7;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      .valid-form {
+        background-color: #000059 !important;
+      }
+      .active-sign-in-link {
+        color: #5151ec;
+      }
+    }
+
+    .detail-heading {
+      color: #000000;
+    }
+
+    .detail-sub-heading {
+      margin-bottom: 40px;
+      color: #4a4a4a;
+    }
+
+    .signup-left-account-container {
+      .terms-condition-signup {
+        width: 364px;
+        margin-bottom: 0px;
+        color: #a5a5a5;
+
+        .link {
+          color: #a5a5a5;
+        }
+      }
+    }
+
+    .center-signup-content {
+      max-height: calc(100vh - 288px);
+      min-height: 664px;
+      flex: 1;
+    }
+  }
+
+  .signup-right {
+    width: 50%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image: url("https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109094433-openart-image_t2OEw-gd_1736415771720_raw.jpg");
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+//media queries below
+
+@media screen and (max-width: 768px) {
+  .signup {
+    .signup-left {
+      width: 100%;
+      height: 100%;
+      background: url("https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109095040-openart-image_NzZfP4kP_1736416187321_raw.jpg")
+        center;
+      background-size: cover;
+
+      .detail-sub-heading {
+        margin-bottom: 32px;
+      }
+      .center-signup-content {
+        background-color: white;
+        width: 416px;
+        border-radius: 12px;
+        margin: auto;
+        padding: 32px 24px;
+        flex: none;
+        height: 742px;
+        min-height: unset;
+        max-height: unset;
+        box-sizing: border-box;
+      }
+    }
+    .signup-right {
+      display: none;
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .signup {
+    height: 100vh;
+    position: relative;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .signup-left {
+      background: none;
+      .center-signup-content {
+        height: 100%;
+        padding: 24px 16px;
+        margin: 0px;
+        width: 100%;
+        background: url("https://d2k6zobmg5lufr.cloudfront.net/assets%2F20250109100703-openart-image_gUSEGAUu_1736417179432_raw.jpg")
+          no-repeat right;
+        background-size: cover;
+
+        .signup-content-container {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+
+          .signup-left-form-container {
+            flex: 1;
+            overflow-y: scroll;
+
+            &::-webkit-scrollbar {
+              display: none;
+            }
+
+            .sign-up-bottom-content {
+              gap: 16px;
+            }
+          }
+        }
+      }
+
+      .left-upper-container-signup {
+        gap: 24px;
+        width: unset;
+      }
+
+      .signup-form {
+        width: unset;
+      }
+
+      .detail-sub-heading {
+        margin-bottom: 24px;
+      }
+      .signup-left-img-container {
+        margin: 0px;
+      }
+      .form-input {
+        font-size: 14px;
+      }
+      .signup-left-account-container {
+        margin-top: 0px;
+      }
+
+      .signup-form {
+        width: 100%;
+        height: 100%;
+        justify-content: space-between;
+
+        .sign-up-btn {
+          width: 100% !important;
+        }
+      }
+      .signup-left-account-container {
+        .terms-condition-signup {
+          width: 100%;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}

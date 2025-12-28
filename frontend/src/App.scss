@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.lottie-animation-main-container {
+  height: 100vh;
+  .lottie-container {
+    height: 150px;
+    width: 150px;
+  }
+}
