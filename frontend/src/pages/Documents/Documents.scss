@@ -1,12 +1,15 @@
 .documents-main-page-container {
 
   .documents-content-body {
-    display: flex;
-    align-items: flex-start;
 
     .documents-files-container {
       display: flex;
       flex-direction: column;
+      .documents-box-background {
+        position: absolute;
+        padding-left: 25%;
+        z-index: -1;
+      }
     }
   }
 }

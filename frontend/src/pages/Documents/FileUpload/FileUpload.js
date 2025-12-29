@@ -4,10 +4,10 @@ import { Close } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./FileUpload.scss";
-import URL from "../../../urls/Urls";
 import { fileUploadSubject } from "../../../services/file.service";
 import { toastOptions } from "../../../utils/toast";
 import ApiService from "../../../services/apiService";
+import URL_CONSTANTS from "../../../urls/Urls";
 
 function FileUpload() {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -19,13 +19,27 @@ function FileUpload() {
   const [editingFileName, setEditingFileName] = useState("");
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
 
-  const handleFileChange = (event) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const files = Array.from(event.target.files);
-      setSelectedFiles(files);
-      setDisplayNames(files.map((file) => file.name));
-    }
-  };
+ const handleFileChange = (event) => {
+  if (!event.target.files || event.target.files.length === 0) return;
+
+  const files = Array.from(event.target.files);
+
+  // Allow only PDFs
+  const nonPdfFiles = files.filter(
+    (file) => file.type !== "application/pdf"
+  );
+
+  if (nonPdfFiles.length > 0) {
+    toast.error("Please select PDF files only", toastOptions);
+    event.target.value = ""; // reset file input
+    return;
+  }
+
+  // All files are valid PDFs
+  setSelectedFiles(files);
+  setDisplayNames(files.map((file) => file.name));
+};
+
 
   const handleOpenEditDialog = (fileIndex) => {
     setEditingFileIndex(fileIndex);
@@ -87,7 +101,7 @@ function FileUpload() {
       try {
         setLoading(true);
         setIsPreviewDialogOpen(false);
-        await ApiService().client.post(URL.FILES.UPLOAD_FILE, formData);
+        await ApiService().client.post(URL_CONSTANTS.DOCUMENTS.UPLOAD_FILE, formData);
         fileUploadSubject.next(true);
 
         toast.success("Upload successful!", toastOptions);
@@ -103,14 +117,15 @@ function FileUpload() {
   };
 
   return (
-    <div className="upload-section">
+    <div className="upload-section flex-column gap-12 align-items-center p-16">
       <h3>Upload a New File</h3>
       <div className="upload-container">
         <input
           type="file"
           id="select-file"
+          accept="application/pdf"
           onChange={handleFileChange}
-          multiple
+          multiple={false}
         />
         <label htmlFor="select-file" className="select-file-label">
           <Button color="error" variant="contained" component="span">

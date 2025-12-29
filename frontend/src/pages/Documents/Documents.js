@@ -12,17 +12,18 @@ const Documents = () => {
   return (
 
     <div className="documents-main-page-container full-width">
-      <div className="documents-content-body">
+      <div className="documents-content-body flex-column">
         <Header ></Header>
-        {/* <div className="documents-files-container ">
+        <div className="documents-files-container ">
           <img
+        
             src="https://d2k6zobmg5lufr.cloudfront.net/assets%2F20240109190634-box+1.svg"
             alt="box-background"
-            className="box-background"
+            className="documents-box-background"
           />
           <FileUpload></FileUpload>
-          <UploadedFileList></UploadedFileList>
-        </div> */}
+          {/* <UploadedFileList></UploadedFileList> */}
+        </div>
       </div>
     </div>
   );
