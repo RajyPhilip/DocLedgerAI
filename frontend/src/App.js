@@ -11,43 +11,47 @@ import {
   JWT_TOKEN,
   removeCookie,
 } from "./services/cookieService";
-import URLS from "./urls/Urls";
+import URL_CONSTANTS from "./urls/Urls";
 import useUserStore from "./store/useUserStore";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const [loading, setLoading] = useState(false);
   const [globalLoader, setGlobalLoader] = useState(true);
 
   const setUser = useUserStore((state) => state.setUser);
-
+  const logoutUser = useUserStore((state) => state.logout);
+  const navigate = useNavigate();
+  
   useEffect(() => {
     handleIsUser();
   }, []);
 
-  const handleIsUser = async () => {
-    try {
-      const token = getCookie(JWT_TOKEN);
-
-      // ✅ correct token check
-      if (!token || token === "undefined") {
-        setGlobalLoader(false);
-        return;
-      }
-
-      const api = ApiService();
-      const response = await api.client.post(URLS.USERS.VERIFY_USER);
-
-      if (response.data.status !== "success") {
-        throw new Error("Invalid token");
-      }
-
-      setUser(response.data.data.user);
-    } catch (error) {
-      removeCookie(JWT_TOKEN);
-    } finally {
+ const handleIsUser = async () => {
+  try {
+    const token = getCookie(JWT_TOKEN);
+    if (!token) {
       setGlobalLoader(false);
+      return;
     }
-  };
+
+    const api = ApiService();
+    const res = await api.client.post(URL_CONSTANTS.USERS.VERIFY_USER);
+
+    if (res.data.status !== "success") {
+      throw new Error("Invalid token");
+    }
+
+    setUser(res.data.data.user);
+  } catch {
+    removeCookie(JWT_TOKEN);
+    logoutUser();
+    navigate("/signin");
+  } finally {
+    setGlobalLoader(false);
+  }
+};
+
 
   return (
     <div>

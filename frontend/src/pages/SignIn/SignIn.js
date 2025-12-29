@@ -11,7 +11,7 @@ import FormInput from "../../components/FormInput/FormInput";
 import ApiService from "../../services/apiService";
 import useUserStore from "../../store/useUserStore";
 import { getCookie, JWT_TOKEN, setCookie } from "../../services/cookieService";
-import URLS from "../../urls/Urls";
+import URL_CONSTANTS from "../../urls/Urls";
 
 const SignIn = () => {
   const setUser = useUserStore((state) => state.setUser);
@@ -43,7 +43,7 @@ const SignIn = () => {
         email: email,
         password: password,
       };
-      const response = await api.client.post(URLS.USERS.SIGNIN, body);
+      const response = await api.client.post(URL_CONSTANTS.USERS.SIGNIN, body);
 
       if (response.data.status !== "success") {
         toast.error(response.data.message, toastOptions);
@@ -53,9 +53,9 @@ const SignIn = () => {
       const data = response.data.data;
 
       setUser(data.user);
-
+ ('DATA TOKENN::',data)
       setCookie(JWT_TOKEN, data.token);
-
+      toast.success("Welcome Back!");
       navigate("/documents");
     } catch (error) {
       console.error("Error sending data:", error);
@@ -74,7 +74,7 @@ const SignIn = () => {
           >
             {breakpoint !== ScreenSizes.MOBILE && (
           
-                <a  className="logo-footer-mobile" href="https://imgbb.com/"><img style={{marginLeft:'-32px'}} height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></a>
+                <div  className="logo-footer-mobile"><img style={{marginLeft:'-32px'}} height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></div>
             )}
 
             <span className="signin-description flex-column gap-4">
@@ -121,8 +121,8 @@ const SignIn = () => {
 
           <span className="go-to-signup xetgo-font-button-bold">
 
-            <a  className="logo-footer-mobile" href="https://imgbb.com/"><img height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></a>
-
+            <div  className="logo-footer-mobile"><img style={{marginLeft:'-32px'}} height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></div>
+           
             <span className="footer-signup flex-row align-items-center gap-4 xetgo-font-button">
               <span style={{ color: "#A5A5A5" }}> New to DocLedger AI? </span>
               <span

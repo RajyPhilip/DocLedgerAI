@@ -1,43 +1,54 @@
-import axios, { AxiosInstance } from "axios";
-import { JWT_TOKEN, getCookie } from "./cookieService";
+import axios from "axios";
 import { Subject } from "rxjs";
+import { JWT_TOKEN, getCookie, removeCookie } from "./cookieService";
 
 const API_URL = process.env.REACT_APP_API_BASE_URL;
 
-// Created a Singleton Api Service class all apis intercepted here to connect to backend
 const ApiService = (() => {
-  let instance;
+  let instance = null;
 
   function createInstance() {
     const loadingSubject = new Subject();
-    const customApiService = axios.create({
+
+    const client = axios.create({
       baseURL: API_URL,
     });
-    customApiService.interceptors.request.use((config) => {
+
+    client.interceptors.request.use((config) => {
       loadingSubject.next(true);
-      config.headers["Authorization"] = `Bearer ${getCookie(JWT_TOKEN)}`;
+
+      const token = getCookie(JWT_TOKEN);
+       ("ATTACHING TOKEN:", token);
+      if (token && token !== "undefined") {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+
       return config;
     });
-    customApiService.interceptors.response.use(
+
+    client.interceptors.response.use(
       (response) => {
         loadingSubject.next(false);
         return response;
       },
       (error) => {
         loadingSubject.next(false);
+
+        if (error.response?.status === 401) {
+          console.warn("401 detected – clearing auth only");
+          // removeCookie(JWT_TOKEN);
+          // ❌ NO redirect here
+        }
+
         return Promise.reject(error);
-      },
+      }
     );
-    return {
-      loadingSubject,
-      client: customApiService,
-    };
+
+    return { client, loading$ : loadingSubject.asObservable() };
   }
 
   return () => {
-    if (!instance) {
-      instance = createInstance();
-    }
+    if (!instance) instance = createInstance();
     return instance;
   };
 })();

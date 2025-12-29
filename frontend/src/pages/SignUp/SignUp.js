@@ -7,6 +7,7 @@ import ApiService from "../../services/apiService";
 import useUserStore from "../../store/useUserStore";
 import { setCookie, JWT_TOKEN } from "../../services/cookieService";
 import { toast } from "react-toastify";
+import URL_CONSTANTS from "../../urls/Urls";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ useEffect(() => {
         mobile_number: Number(formData.mobileNumber),
       };
 
-      const response = await api.client.post("/auth/signup", payload);
+      const response = await api.client.post(URL_CONSTANTS.USERS.SIGNUP, payload);
 
       const { token, user } = response.data.data;
 

@@ -1,17 +1,18 @@
-import Cookies from "js-cookie";
-
 export const JWT_TOKEN = "jwtToken";
 
-function setCookie(key, value) {
-  Cookies.set(key, value, { expires: 2 });
-}
+export const setCookie = (name, value, days = 7) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+};
 
-function getCookie(key) {
-  return Cookies.get(key);
-}
+export const getCookie = (name) => {
+  const match = document.cookie.match(
+    new RegExp("(^| )" + name + "=([^;]+)")
+  );
+  return match ? match[2] : null;
+};
 
-function removeCookie(key) {
-  Cookies.remove(key);
-}
-
-export { setCookie, getCookie, removeCookie };
+export const removeCookie = (name) => {
+  document.cookie = `${name}=; Max-Age=0; path=/`;
+};
