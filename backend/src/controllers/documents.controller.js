@@ -6,7 +6,7 @@ const { eq, desc } = require("drizzle-orm");
 // UPLOAD DOCUMENT
 exports.uploadDocument = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.userId;;
     const file = req.file;
 
     if (!file) {
@@ -45,10 +45,11 @@ exports.uploadDocument = async (req, res) => {
   }
 };
 
+
 // GET DOCUMENTS (PAGINATION)
 exports.getDocuments = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.userId;;
     const page = Number(req.query.page || 1);
     const limit = Number(req.query.limit || 10);
     const offset = (page - 1) * limit;
@@ -82,7 +83,7 @@ exports.getDocuments = async (req, res) => {
 // DELETE DOCUMENT
 exports.deleteDocument = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.userId;;
     const docId = Number(req.params.id);
 
     const [doc] = await db

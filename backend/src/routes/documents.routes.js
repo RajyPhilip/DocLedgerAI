@@ -5,7 +5,7 @@ const controller = require("../controllers/documents.controller");
 
 const router = express.Router();
 
-router.post("/", auth, upload.single("file"), controller.uploadDocument);
+router.post("/upload", auth, upload.single("file"), controller.uploadDocument);
 router.get("/", auth, controller.getDocuments);
 router.delete("/:id", auth, controller.deleteDocument);
 

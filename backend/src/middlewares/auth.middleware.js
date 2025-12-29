@@ -2,14 +2,26 @@ const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader)
-    return res.status(401).json({ message: "Unauthorized" });
+
+   ("AUTH HEADER:", authHeader);
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      status: "error",
+      message: "Authorization header missing",
+    });
+  }
 
   const token = authHeader.split(" ")[1];
+
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // { userId, email }
     next();
-  } catch {
-    return res.status(401).json({ message: "Invalid token" });
+  } catch (err) {
+    return res.status(401).json({
+      status: "error",
+      message: "Invalid token",
+    });
   }
 };
