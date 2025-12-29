@@ -1,6 +1,6 @@
 import "./UploadedFileList.scss";
 import { toast } from "react-toastify";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   fetchFiles,
@@ -55,7 +55,7 @@ const UploadedFileList = () => {
   }, []);
 
   useEffect(() => {
-    const filteredFiles = files.filter((file) => {
+    const filteredFiles = files.filter((file,ind) => {
       return file.name?.toLowerCase().includes(searchedText.toLowerCase());
     });
     searchedText === ""
@@ -131,10 +131,10 @@ const UploadedFileList = () => {
         pageNumber,
         searchQuery,
       );
-      setFiles(response.data);
+      setFiles(response.data||[]);
       setTotalPages(response.totalPages);
     } catch (error) {
-      console.error("error", error);
+      console.error("error fetching and setting files", error);
     }
   };
 

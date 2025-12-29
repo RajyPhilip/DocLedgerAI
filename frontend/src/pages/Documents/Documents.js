@@ -22,7 +22,7 @@ const Documents = () => {
             className="documents-box-background"
           />
           <FileUpload></FileUpload>
-          {/* <UploadedFileList></UploadedFileList> */}
+          <UploadedFileList></UploadedFileList>
         </div>
       </div>
     </div>
