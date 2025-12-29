@@ -18,7 +18,6 @@ const ApiService = (() => {
       loadingSubject.next(true);
 
       const token = getCookie(JWT_TOKEN);
-       ("ATTACHING TOKEN:", token);
       if (token && token !== "undefined") {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -36,8 +35,6 @@ const ApiService = (() => {
 
         if (error.response?.status === 401) {
           console.warn("401 detected – clearing auth only");
-          // removeCookie(JWT_TOKEN);
-          // ❌ NO redirect here
         }
 
         return Promise.reject(error);

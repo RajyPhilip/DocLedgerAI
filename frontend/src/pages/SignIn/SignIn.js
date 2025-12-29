@@ -53,7 +53,6 @@ const SignIn = () => {
       const data = response.data.data;
 
       setUser(data.user);
- ('DATA TOKENN::',data)
       setCookie(JWT_TOKEN, data.token);
       toast.success("Welcome Back!");
       navigate("/documents");

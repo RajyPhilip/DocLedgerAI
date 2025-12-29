@@ -19,10 +19,6 @@ const Documents = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-
-   ("COOKIE:", document.cookie);
- ("TOKEN:", getCookie(JWT_TOKEN));
-
   // ✅ Create API instance ONCE
   const api = ApiService();
 
