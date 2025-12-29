@@ -1,0 +1,141 @@
+.list-container {
+  width: 100%;
+  margin-top: 24px;
+  z-index: 10;
+
+  .search-container {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    #search-file-input {
+      padding: 12px;
+      box-sizing: border-box;
+      border: 1px solid lightgray;
+      width: 400px;
+      transition: width 0.5s ease;
+      border-radius: 6px;
+    }
+
+    #search-file-input:focus {
+      outline: none;
+    }
+
+    .fa-magnifying-glass {
+      position: absolute;
+      left: 370px;
+      top: 12px;
+      color: lightgray;
+    }
+
+    .result-showing-heading {
+      text-align: center;
+      margin: 0px;
+    }
+  }
+
+  .home-table {
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    width: 100%;
+
+    .no_files {
+      text-align: center;
+      color: grey;
+    }
+
+    .preview {
+      text-align: center;
+
+      .download-button {
+        text-decoration: none;
+        font-size: small;
+        color: #37aacd;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+    }
+
+    .actions {
+      text-align: center;
+      i {
+        cursor: pointer;
+        color: lightgray;
+      }
+      .fa-trash:hover {
+        color: rgb(233, 26, 26) !important;
+      }
+    }
+
+    th,
+    td {
+      padding: 8px 16px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: auto 200px 120px;
+    }
+
+    td {
+      border: 1px solid #ddd;
+    }
+
+    th:first-child,
+    td:first-child {
+      padding-left: 16px;
+    }
+
+    th:last-child,
+    td:last-child {
+      padding-right: 16px;
+      gap: 16px;
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  .pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 20px;
+    margin-top: 12px;
+
+    .home-table th {
+      background-color: #f2f2f2;
+    }
+
+    .home-table td {
+      border: 1px solid #ddd;
+    }
+
+    .home-table th:first-child,
+    .home-table td:first-child {
+      padding-left: 16px;
+    }
+
+    .home-table th:last-child,
+    .home-table td:last-child {
+      padding-right: 16px;
+    }
+  }
+}
+.edit-box {
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+}
+.edit-box:focus {
+  border: 1px solid black;
+}

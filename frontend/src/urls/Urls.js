@@ -8,8 +8,11 @@ const URL_CONSTANTS = {
   },
   DOCUMENTS: {
     GET: "/documents",
-    UPLOAD: "/documents/upload",
+    UPLOAD_FILE: "/documents/upload",
+    UPDATE_FILE:(fileID)=>`/delete-file/${fileID}`,
+    DELETE:(fileID)=>`/delete-file/${fileID}`,
   },
+  
 };
 
 export default URL_CONSTANTS;

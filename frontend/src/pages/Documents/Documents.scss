@@ -1,7 +1,12 @@
 .documents-main-page-container {
-    height: 100vh;
-    .upper-bar {
-            border-bottom: 1px solid #f1f1f1;
-            color: #aa5200;
+
+  .documents-content-body {
+    display: flex;
+    align-items: flex-start;
+
+    .documents-files-container {
+      display: flex;
+      flex-direction: column;
     }
+  }
 }
