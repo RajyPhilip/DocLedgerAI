@@ -1,6 +1,6 @@
 {
-  "id": "8a78c2c7-2a74-4362-88a7-6818432875f8",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -18,17 +18,23 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "password_hash": {
           "name": "password_hash",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mobile_number": {
+          "name": "mobile_number",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         }
@@ -37,8 +43,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
       "checkConstraints": {},
+      "policies": {},
       "isRLSEnabled": false
     }
   },
@@ -49,8 +55,11 @@
   "policies": {},
   "views": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
     "tables": {}
   }
 }

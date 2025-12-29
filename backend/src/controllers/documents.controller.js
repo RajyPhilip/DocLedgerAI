@@ -45,7 +45,6 @@ exports.uploadDocument = async (req, res) => {
   }
 };
 
-
 // GET DOCUMENTS (PAGINATION)
 exports.getDocuments = async (req, res) => {
   try {
@@ -80,44 +79,3 @@ exports.getDocuments = async (req, res) => {
   }
 };
 
-// DELETE DOCUMENT
-exports.deleteDocument = async (req, res) => {
-  try {
-    const userId = req.user.userId;;
-    const docId = Number(req.params.id);
-
-    const [doc] = await db
-      .select()
-      .from(pdfUploads)
-      .where(eq(pdfUploads.id, docId));
-
-    if (!doc) {
-      return res.status(404).json({
-        status: "error",
-        message: "Document not found",
-      });
-    }
-
-    // Ownership check
-    if (doc.userId !== userId) {
-      return res.status(403).json({
-        status: "error",
-        message: "Unauthorized",
-      });
-    }
-
-    await deletePdf(doc.storageKey);
-    await db.delete(pdfUploads).where(eq(pdfUploads.id, docId));
-
-    return res.json({
-      status: "success",
-      message: "Document deleted",
-    });
-  } catch (err) {
-    console.error("Delete error:", err);
-    return res.status(500).json({
-      status: "error",
-      message: "Delete failed",
-    });
-  }
-};

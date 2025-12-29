@@ -1,11 +1,207 @@
 {
-  "id": "ccc2eba9-4cd0-499a-956c-8b1f51295b9c",
-  "prevId": "8a78c2c7-2a74-4362-88a7-6818432875f8",
+  "id": "d8abe830-fc56-4922-81dc-2fbec53eff23",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.pdf_uploads": {
-      "name": "pdf_uploads",
+    "public.document_ai_outputs": {
+      "name": "document_ai_outputs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "summary_text": {
+          "name": "summary_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "document_ai_outputs_document_id_documents_id_fk": {
+          "name": "document_ai_outputs_document_id_documents_id_fk",
+          "tableFrom": "document_ai_outputs",
+          "tableTo": "documents",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.document_texts": {
+      "name": "document_texts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_text": {
+          "name": "raw_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "translated_text": {
+          "name": "translated_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "document_texts_document_id_documents_id_fk": {
+          "name": "document_texts_document_id_documents_id_fk",
+          "tableFrom": "document_texts",
+          "tableTo": "documents",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.document_transactions": {
+      "name": "document_transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "doc_no": {
+          "name": "doc_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "execution_date": {
+          "name": "execution_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registration_date": {
+          "name": "registration_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nature": {
+          "name": "nature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consideration_value": {
+          "name": "consideration_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "market_value": {
+          "name": "market_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "survey_numbers": {
+          "name": "survey_numbers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plot_number": {
+          "name": "plot_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "extent": {
+          "name": "extent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "document_transactions_document_id_documents_id_fk": {
+          "name": "document_transactions_document_id_documents_id_fk",
+          "tableFrom": "document_transactions",
+          "tableTo": "documents",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.documents": {
+      "name": "documents",
       "schema": "",
       "columns": {
         "id": {
@@ -20,14 +216,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "file_name": {
-          "name": "file_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "storage_key": {
-          "name": "storage_key",
+        "original_filename": {
+          "name": "original_filename",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -38,12 +228,18 @@
           "primaryKey": false,
           "notNull": true
         },
-        "mime_type": {
-          "name": "mime_type",
+        "translated_file_url": {
+          "name": "translated_file_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'application/pdf'"
+          "default": "'UPLOADED'"
         },
         "created_at": {
           "name": "created_at",
@@ -55,196 +251,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "pdf_uploads_user_id_users_id_fk": {
-          "name": "pdf_uploads_user_id_users_id_fk",
-          "tableFrom": "pdf_uploads",
+        "documents_user_id_users_id_fk": {
+          "name": "documents_user_id_users_id_fk",
+          "tableFrom": "documents",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.properties": {
-      "name": "properties",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "survey_number": {
-          "name": "survey_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "district": {
-          "name": "district",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "village": {
-          "name": "village",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "house_number": {
-          "name": "house_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.transactions": {
-      "name": "transactions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "property_id": {
-          "name": "property_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "document_number": {
-          "name": "document_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "transaction_date": {
-          "name": "transaction_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "transaction_value": {
-          "name": "transaction_value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "transactions_property_id_properties_id_fk": {
-          "name": "transactions_property_id_properties_id_fk",
-          "tableFrom": "transactions",
-          "tableTo": "properties",
-          "columnsFrom": [
-            "property_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.transaction_versions": {
-      "name": "transaction_versions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "buyer_name": {
-          "name": "buyer_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "seller_name": {
-          "name": "seller_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "raw_text": {
-          "name": "raw_text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "transaction_versions_transaction_id_transactions_id_fk": {
-          "name": "transaction_versions_transaction_id_transactions_id_fk",
-          "tableFrom": "transaction_versions",
-          "tableTo": "transactions",
-          "columnsFrom": [
-            "transaction_id"
           ],
           "columnsTo": [
             "id"
@@ -273,17 +285,23 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "password_hash": {
           "name": "password_hash",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mobile_number": {
+          "name": "mobile_number",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         }
