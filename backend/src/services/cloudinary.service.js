@@ -7,28 +7,41 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadPdf = async (buffer, filename) => {
+const uploadPDF = async (file) => {
+  if (!file || !file.buffer) {
+    throw new Error("Invalid file");
+  }
+
+  const filename = file.originalname || `document_${Date.now()}.pdf`;
+  const publicId = `doc_${Date.now()}_${path.parse(filename).name}`;
+
+  // 🔑 IMPORTANT FIX: convert ArrayBuffer → Buffer
+  const buffer =
+    Buffer.isBuffer(file.buffer)
+      ? file.buffer
+      : Buffer.from(file.buffer);
+
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
         {
           folder: "docledger_documents",
           resource_type: "raw",
-          public_id: `doc_${Date.now()}_${path.parse(filename).name}`,
+          public_id: publicId,
         },
         (error, result) => {
           if (error) return reject(error);
-          resolve(result);
+          resolve(result.secure_url);
         }
       )
-      .end(buffer);
+      .end(buffer); // ✅ always Buffer now
   });
 };
 
-const deletePdf = async (publicId) => {
+const deletePDF = async (publicId) => {
   return cloudinary.uploader.destroy(publicId, {
     resource_type: "raw",
   });
 };
 
-module.exports = { uploadPdf, deletePdf };
+module.exports = { uploadPDF, deletePDF };

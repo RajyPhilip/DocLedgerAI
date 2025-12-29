@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, jsonb } from "drizzle-orm/pg-core";
+const { pgTable, serial, integer, text, jsonb } = require("drizzle-orm/pg-core");
 import { documents } from "./documents.schema";
 
 export const documentTransactions = pgTable("document_transactions", {

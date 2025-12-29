@@ -1,81 +1,80 @@
-const db = require("../db");
-const { pdfUploads } = require("../db/schema/pdfUploads.schema");
-const { uploadPdf, deletePdf } = require("../services/cloudinary.service");
+const { documents } = require("../db/schema/documents.schema");
 const { eq, desc } = require("drizzle-orm");
+const { uploadPDF } = require("../services/cloudinary.service");
+const { processDocument } = require("../services/documentProcessing.service");
+const db = require("../db");
 
-// UPLOAD DOCUMENT
 exports.uploadDocument = async (req, res) => {
   try {
-    const userId = req.user.userId;;
-    const file = req.file;
+    const userId = req.user.userId;
 
-    if (!file) {
-      return res.status(400).json({
-        status: "error",
-        message: "No file uploaded",
-      });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "File is required" });
     }
 
-    const cloudinaryRes = await uploadPdf(
-      file.buffer,
-      file.originalname
-    );
+    const file = req.files[0];
+    const originalFilename = Array.isArray(req.body.displayNames)
+      ? req.body.displayNames[0]
+      : file.originalname;
 
+    // 1️⃣ Upload PDF
+    const fileUrl = await uploadPDF(file.buffer, originalFilename);
+
+    // 2️⃣ Save document
     const [doc] = await db
-      .insert(pdfUploads)
+      .insert(documents)
       .values({
         userId,
-        fileName: file.originalname,
-        storageKey: cloudinaryRes.public_id,
-        fileUrl: cloudinaryRes.secure_url,
-        mimeType: file.mimetype,
+        originalFilename,
+        fileUrl,
+        status: "UPLOADED",
       })
       .returning();
+
+    // 3️⃣ Fire-and-forget AI processing (SAFE)
+    setImmediate(() => {
+      processDocument(doc.id, doc.fileUrl).catch((err) =>
+        console.error("AI processing failed:", err)
+      );
+    });
 
     return res.status(201).json({
       status: "success",
       data: doc,
     });
   } catch (err) {
-    console.error("Upload error:", err);
-    return res.status(500).json({
-      status: "error",
-      message: "Upload failed",
-    });
+    console.error("Upload failed:", err);
+    return res.status(500).json({ message: "Upload failed" });
   }
 };
 
-// GET DOCUMENTS (PAGINATION)
 exports.getDocuments = async (req, res) => {
   try {
-    const userId = req.user.userId;;
-    const page = Number(req.query.page || 1);
-    const limit = Number(req.query.limit || 10);
-    const offset = (page - 1) * limit;
+    const userId = req.user.id;
 
     const docs = await db
       .select()
-      .from(pdfUploads)
-      .where(eq(pdfUploads.userId, userId))
-      .orderBy(desc(pdfUploads.createdAt))
-      .limit(limit)
-      .offset(offset);
+      .from(documents)
+      .where(eq(documents.userId, userId))
+      .orderBy(desc(documents.createdAt));
 
-    return res.json({
+    res.json({
       status: "success",
-      data: {
-        page,
-        limit,
-        documents: docs,
-        hasNextPage: docs.length === limit,
-      },
+      data: docs,
     });
   } catch (err) {
-    console.error("Fetch documents error:", err);
-    return res.status(500).json({
-      status: "error",
-      message: "Failed to fetch documents",
-    });
+    console.error("Get documents failed:", err);
+    res.status(500).json({ message: "Failed to fetch documents" });
   }
 };
 
+exports.deleteDocument = async (req, res) => {
+  const userId = req.user.id;
+  const docId = Number(req.params.id);
+
+  await db
+    .delete(documents)
+    .where(eq(documents.id, docId));
+
+  res.json({ status: "success" });
+};

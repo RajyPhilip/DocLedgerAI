@@ -10,6 +10,9 @@ import ApiService from "../../../services/apiService";
 import URL_CONSTANTS from "../../../urls/Urls";
 
 function FileUpload() {
+  
+  const api = ApiService();
+
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [displayNames, setDisplayNames] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -99,9 +102,10 @@ function FileUpload() {
       });
 
       try {
+        console.log("Uploading files...", );
         setLoading(true);
         setIsPreviewDialogOpen(false);
-        await ApiService().client.post(URL_CONSTANTS.DOCUMENTS.UPLOAD_FILE, formData);
+        await api.client.post(URL_CONSTANTS.DOCUMENTS.UPLOAD_FILE, formData);
         fileUploadSubject.next(true);
 
         toast.success("Upload successful!", toastOptions);

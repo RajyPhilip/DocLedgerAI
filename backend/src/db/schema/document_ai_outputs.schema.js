@@ -1,7 +1,7 @@
-import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
-import { documents } from "./documents.schema";
+const { pgTable, serial, integer, text, timestamp } = require("drizzle-orm/pg-core");
+const  {documents}  = require("./documents.schema");
 
-export const documentAiOutputs = pgTable("document_ai_outputs", {
+exports.documentAiOutputs = pgTable("document_ai_outputs", {
   id: serial("id").primaryKey(),
   documentId: integer("document_id")
     .references(() => documents.id)

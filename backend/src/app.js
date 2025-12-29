@@ -4,6 +4,8 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./routes/auth.routes");
+const documentsRoutes = require("./routes/documents.routes");
+const processingRoutes = require("./routes/processing.routes");
 
 const app = express();
 
@@ -18,8 +20,10 @@ app.use(
 
 app.use(express.json());
 
-// routes
+// ================= ROUTES =================
 app.use("/auth", authRoutes);
-app.use("/documents", require("./routes/documents.routes"));
+app.use("/documents", documentsRoutes);
+
+app.use(processingRoutes);
 
 module.exports = app;

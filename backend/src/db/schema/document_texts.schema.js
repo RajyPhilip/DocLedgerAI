@@ -1,12 +1,16 @@
-import { pgTable, serial, integer, text } from "drizzle-orm/pg-core";
-import { documents } from "./documents.schema";
+const {
+  pgTable,
+  serial,
+  integer,
+  text,
+  timestamp,
+} = require("drizzle-orm/pg-core");
 
-export const documentTexts = pgTable("document_texts", {
+exports.documentTexts = pgTable("document_texts", {
   id: serial("id").primaryKey(),
-  documentId: integer("document_id")
-    .references(() => documents.id)
-    .notNull(),
-
-  rawText: text("raw_text"),
-  translatedText: text("translated_text"),
+  documentId: integer("document_id").notNull(),
+  content: text("content").notNull(),
+  language: text("language").notNull(),
+  type: text("type").notNull(), // original | translated
+  createdAt: timestamp("created_at").defaultNow(),
 });
