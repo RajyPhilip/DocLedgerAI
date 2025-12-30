@@ -31,7 +31,7 @@ const Header = () => {
 
         <p
           onClick={handleLogout}
-          className="xetgo-font-tag bold px-16 py-12 cursor-pointer"
+          className="xetgo-font-tag bold px-16 py-12 cursor-pointer bold"
         >
           <i className="fa-solid fa-right-from-bracket"></i> Logout
         </p>

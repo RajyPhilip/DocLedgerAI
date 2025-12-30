@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import "./DocumentDetail.scss";
 import ApiService from "../../services/apiService";
 import URL_CONSTANTS from "../../urls/Urls";
+import Header from "../../components/Header/Header";
 
 const DocumentDetail = () => {
   const { id } = useParams(); // ✅ get id from URL
@@ -37,8 +38,12 @@ const DocumentDetail = () => {
 
 
   return (
-    <div className="document-detail">
-      <h2>Welcome to detail page of document id {id}</h2>
+    <div className="document-detail-main-page full-width flex-column">
+
+      <Header />
+      <div className="document-detail-lower-main-container p-16 border-box flex-1">
+        <h2>Welcome to detail page of document id {id}</h2>
+      </div>
 
    
 
