@@ -106,6 +106,60 @@ exports.getDocuments = async (req, res) => {
   }
 };
 
+exports.updateDocumentName = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const documentId = Number(req.params.id);
+    const { fileName } = req.body;
+
+    /* ================= VALIDATIONS ================= */
+
+    if (!documentId || isNaN(documentId)) {
+      return res.status(400).json({ message: "Invalid document id" });
+    }
+
+
+    const [existingDoc] = await db
+      .select()
+      .from(documents)
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.userId, userId)
+        )
+      );
+
+    if (!existingDoc) {
+      return res.status(404).json({
+        message: "Document not found or access denied",
+      });
+    }
+
+    const [updatedDoc] = await db
+      .update(documents)
+      .set({
+        originalFilename: fileName,
+      })
+      .where(eq(documents.id, documentId))
+      .returning({
+        id: documents.id,
+        name: documents.originalFilename,
+        fileUrl: documents.fileUrl,
+        createdAt: documents.createdAt,
+      });
+
+    return res.json({
+      status: "success",
+      message: "Document name updated successfully",
+    });
+  } catch (err) {
+    console.error("Update document failed:", err);
+    return res.status(500).json({
+      message: "Failed to update document name",
+    });
+  }
+};
+
 exports.deleteDocument = async (req, res) => {
   const userId = req.user.id;
   const docId = Number(req.params.id);
