@@ -52,10 +52,8 @@ const UploadedFileList = () => {
   /* ================= INITIAL LOAD & PAGE CHANGE ================= */
 
   useEffect(() => {
-    const page = getPageFromUrl();
-    setCurrentPage(page);
-    fetchAndSetFiles(page, searchedText);
-  }, [location.search]);
+    fetchAndSetFiles(currentPage, searchedText);
+  }, []);
 
   /* ================= DEBOUNCED SEARCH (NO URL) ================= */
 
@@ -148,17 +146,21 @@ const UploadedFileList = () => {
 
   /* ================= PAGINATION ================= */
 
-  const handlePreviousPage = () => {
-    const newPage = currentPage - 1;
-    navigate(generateFileListURL(newPage));
-    setCurrentPage(newPage);
-  };
+const handlePreviousPage = () => {
+  if (currentPage === 1) return;
 
-  const handleNextPage = () => {
-    const newPage = currentPage + 1;
-    navigate(generateFileListURL(newPage));
-    setCurrentPage(newPage);
-  };
+  const newPage = currentPage - 1;
+  setCurrentPage(newPage);
+  fetchAndSetFiles(newPage, searchedText);
+};
+
+const handleNextPage = () => {
+  if (currentPage === totalPages) return;
+
+  const newPage = currentPage + 1;
+  setCurrentPage(newPage);
+  fetchAndSetFiles(newPage, searchedText);
+};
 
   return (
     <div className="list-container">
@@ -252,7 +254,7 @@ const UploadedFileList = () => {
             <i className="fa-solid fa-circle-arrow-left disable"></i>
           ) : (
             <i
-              className="fa-solid fa-circle-arrow-left"
+              className="fa-solid fa-circle-arrow-left cursor-pointer"
               onClick={handlePreviousPage}
             ></i>
           )}
@@ -264,7 +266,7 @@ const UploadedFileList = () => {
             <i className="fa-solid fa-circle-arrow-right disable"></i>
           ) : (
             <i
-              className="fa-solid fa-circle-arrow-right"
+              className="fa-solid fa-circle-arrow-right cursor-pointer"
               onClick={handleNextPage}
             ></i>
           )}

@@ -4,6 +4,8 @@ const { uploadPDF } = require("../services/cloudinary.service");
 const { processDocument } = require("../services/documentProcessing.service");
 const db = require("../db");
 
+const PAGE_SIZE = 10;
+
 exports.uploadDocument = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -52,30 +54,39 @@ exports.getDocuments = async (req, res) => {
     const userId = req.user.userId;
 
     const pageNumber = Number(req.query.pageNumber) || 1;
-    const searchQuery = req.query.searchQuery || "";
-    const PAGE_SIZE = 10;
+
+    // 🔥 FIX: READ `search`, NOT `searchQuery`
+    const search = req.query.search?.trim() || "";
+
     const offset = (pageNumber - 1) * PAGE_SIZE;
 
-    const whereCondition = searchQuery
-      ? and(
-          eq(documents.userId, userId),
-          ilike(documents.originalFilename, `%${searchQuery}%`)
-        )
-      : eq(documents.userId, userId);
+    /* ================= WHERE CONDITION ================= */
 
-    const docs = await db
+    let whereCondition = eq(documents.userId, userId);
+
+    if (search) {
+      whereCondition = and(
+        eq(documents.userId, userId),
+        ilike(documents.originalFilename, `%${search}%`)
+      );
+    }
+
+    /* ================= FETCH DATA ================= */
+
+    const data = await db
       .select({
         id: documents.id,
         name: documents.originalFilename,
         url: documents.fileUrl,
-        status: documents.status,
-        createdAt: documents.createdAt, // ✅ SENT TO FRONTEND
+        createdAt: documents.createdAt,
       })
       .from(documents)
       .where(whereCondition)
-      .orderBy(desc(documents.createdAt)) // ✅ MOST RECENT FIRST
+      .orderBy(desc(documents.createdAt))
       .limit(PAGE_SIZE)
       .offset(offset);
+
+    /* ================= COUNT FILTERED ROWS ================= */
 
     const [{ count }] = await db
       .select({ count: sql`count(*)::int` })
@@ -84,17 +95,16 @@ exports.getDocuments = async (req, res) => {
 
     return res.json({
       status: "success",
-      data: docs,
-      totalPages: Math.ceil(count / PAGE_SIZE),
+      data, // ✅ empty array if no match
+      totalPages: count === 0 ? 1 : Math.ceil(count / PAGE_SIZE),
     });
-  } catch (err) {
-    console.error("Get documents failed:", err);
+  } catch (error) {
+    console.error("Get documents failed:", error);
     return res.status(500).json({
       message: "Failed to fetch documents",
     });
   }
 };
-
 
 exports.deleteDocument = async (req, res) => {
   const userId = req.user.id;
