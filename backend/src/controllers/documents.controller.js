@@ -52,14 +52,14 @@ exports.getDocuments = async (req, res) => {
     const userId = req.user.userId;
 
     const pageNumber = Number(req.query.pageNumber) || 1;
-    const search = req.query.search || ""; 
+    const searchQuery = req.query.searchQuery || "";
     const PAGE_SIZE = 10;
     const offset = (pageNumber - 1) * PAGE_SIZE;
 
-    const whereCondition = search
+    const whereCondition = searchQuery
       ? and(
           eq(documents.userId, userId),
-          ilike(documents.originalFilename, `%${search}%`)
+          ilike(documents.originalFilename, `%${searchQuery}%`)
         )
       : eq(documents.userId, userId);
 
@@ -68,9 +68,12 @@ exports.getDocuments = async (req, res) => {
         id: documents.id,
         name: documents.originalFilename,
         url: documents.fileUrl,
+        status: documents.status,
+        createdAt: documents.createdAt, // ✅ SENT TO FRONTEND
       })
       .from(documents)
       .where(whereCondition)
+      .orderBy(desc(documents.createdAt)) // ✅ MOST RECENT FIRST
       .limit(PAGE_SIZE)
       .offset(offset);
 

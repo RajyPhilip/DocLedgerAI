@@ -3,6 +3,7 @@ const {
   serial,
   text,
   integer,
+  timestamp
 } = require("drizzle-orm/pg-core");
 
 exports.documents = pgTable("documents", {
@@ -14,4 +15,5 @@ exports.documents = pgTable("documents", {
 
   translatedFileUrl: text("translated_file_url"),
   status: text("status").default("UPLOADED"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
