@@ -72,6 +72,17 @@
             }
           }
         }
+        .translate-pdf-btn {
+          background: #1a25b7;
+          border-radius: 8px;
+          color: white;
+          cursor: pointer;
+          width: fit-content;
+          
+          &:hover {
+            background: #1d4ed8
+          }
+        }
       }
       }
     }
@@ -274,41 +285,40 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 // Responsive adjustments
 @media (max-width: 768px) {
-  .document-header {
+  // .document-header {
+  //   flex-direction: column;
+  //   gap: 16px;
+  //   align-items: flex-start;
+  // }
+
+  .document-detail-main-page .document-detail-lower-main-container .pdf-section .pdf-container .pdf-preview .pdf-actions .action-btn{
+    padding: 10px;
+  }
+  .pdf-placeholder-container-mob {
+    height: 350px;
+  }
+  
+  .pdf-section {
     flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
   }
-  
   .content-grid {
-    gap: 16px;
+    flex-direction: column;
   }
   
-  .pdf-container .pdf-preview {
-    height: 400px;
-  }
+  // .pdf-container .pdf-preview {
+  //   height: 400px;
+  // }
   
-  .card .card-content {
-    padding: 16px;
-  }
+  // .card .card-content {
+  //   padding: 16px;
+  // }
   
-  .transactions-content .transactions-table {
-    display: block;
-    overflow-x: auto;
-  }
+  // .transactions-content .transactions-table {
+  //   display: block;
+  //   overflow-x: auto;
+  // }
 }
 
 

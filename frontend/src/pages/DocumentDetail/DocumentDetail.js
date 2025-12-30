@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 
 const DocumentDetail = () => {
   const { id } = useParams();
-  const [ifTranslatedPdfAvailable, setIfTranslatedPdfAvailable] = useState(true); 
+  const [ifTranslatedPdfAvailable, setIfTranslatedPdfAvailable] = useState(false); 
   const [documentDetail, setDocumentDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -90,11 +90,10 @@ const DocumentDetail = () => {
         <div className="pdf-section flex-row gap-16">
           <div className="pdf-container flex-1">
             <div className="pdf-header"></div>
-            
-            <div className="pdf-preview flex-row p-16 align-items-center justify-content-center position-relative">
               {/* original PDF  Content */}
+            <div className="pdf-preview flex-row p-16 align-items-center justify-content-center position-relative">
               <div className="flex-row gap-24 full-width">
-<div className="flex-1 flex-column gap-16">
+<div className="flex-1 flex-column gap-16 pdf-placeholder-container-mob">
                   <div className="pdf-placeholder flex-column gap-8">
                    <div className="flex-column gap-24">
                      <i className="fa-regular fa-file-pdf fa-4x"></i>
@@ -107,13 +106,13 @@ const DocumentDetail = () => {
                   
                   <div className="pdf-actions flex-row gap-12 justify-content-space-between align-items-center">
                         <div 
-                          className="action-btn primary bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4"
+                          className="action-btn primary bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
                         >
                          <i class="fa-regular fa-eye"></i>
                           Preview in New Tab
                         </div>
                         <div 
-                          className="action-btn bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4"
+                          className="action-btn bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
                         >
                           <i class="fa-solid fa-download"></i>
                           Download PDF
@@ -129,7 +128,7 @@ const DocumentDetail = () => {
             </div>
           </div>
 
-          {ifTranslatedPdfAvailable &&
+          {ifTranslatedPdfAvailable ?
             <div className="pdf-container flex-1">
             <div className="pdf-header"></div>
             
@@ -149,13 +148,13 @@ const DocumentDetail = () => {
                   
                   <div className="pdf-actions flex-row gap-12 justify-content-space-between align-items-center">
                         <div 
-                          className="action-btn primary bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4"
+                          className="action-btn primary bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
                         >
                          <i class="fa-regular fa-eye"></i>
                           Preview in New Tab
                         </div>
                         <div 
-                          className="action-btn bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4"
+                          className="action-btn bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
                         >
                           <i class="fa-solid fa-download"></i>
                           Download PDF
@@ -169,7 +168,18 @@ const DocumentDetail = () => {
               
              
             </div>
-          </div>}
+          </div>
+          : <div className="pdf-container flex-1">
+            <div className="pdf-header"></div>
+            <div style={{height:'80%'}} className="pdf-preview flex-column p-16 align-items-center justify-content-space-around position-relative">
+             <div style={{color:'#1d1f76'}} className="flex-row gap-4 align-items-center">
+               <i class="fa-brands fa-autoprefixer fa-4x"></i>
+              <i class="fa-solid fa-arrow-down-up-across-line fa-2x"></i>
+             </div>
+<div className="translate-pdf-btn px-20 py-12 flex-row align-items-center justify-content-space-between gap-8"> <i class="fa-solid fa-language"></i> <p>Translate PDF</p> </div>
+            </div>
+          </div>
+          }
            
         </div>
 
@@ -208,8 +218,8 @@ const DocumentDetail = () => {
                   <i style={{color:'#64748b'}} class="fa-solid fa-file-circle-minus fa-2x"></i>
                   <p className="xetgo-font-button">
                     {documentDetail?.translatedPdfUrl 
-                      ? "Summary not generated yet. Generate from translated PDF?"
-                      : "Summary not generated yet. Generate from original document?"}
+                      ? "Summary not generated. Generate from translated PDF?"
+                      : "Summary not generated. Generate from original PDF?"}
                   </p>
                   <div 
                     className="generate-btn xetgo-font-button bolder px-24 py-12 bold cursor-pointer flex-row align-items-center justify-content-center gap-8"
