@@ -8,9 +8,10 @@ const URL_CONSTANTS = {
   },
   DOCUMENTS: {
     GET: "/documents",
+    GET_DETAIL: (id)=>`/documents/${id}`,
     UPLOAD_FILE: "/documents/upload",
-    UPDATE_FILE:(fileID)=>`/delete-file/${fileID}`,
-    DELETE:(fileID)=>`/delete-file/${fileID}`,
+    UPDATE_FILE:(id)=>`/update-document/${id}`,
+    DELETE:(fileID)=>`/delete-document/${fileID}`,
   },
   
 };

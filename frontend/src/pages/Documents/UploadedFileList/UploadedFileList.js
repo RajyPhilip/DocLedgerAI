@@ -162,6 +162,10 @@ const handleNextPage = () => {
   fetchAndSetFiles(newPage, searchedText);
 };
 
+  const handleRowClick = (id) => {
+    navigate(`/documents/${id}`);
+  };
+
   return (
     <div className="list-container">
       <div className="search-container">
@@ -193,13 +197,19 @@ const handleNextPage = () => {
             <th>Name</th>
             <th>Download</th>
             <th>Actions</th>
+            <th>Uploaded At</th>
+
           </tr>
         </thead>
         <tbody>
           {filteredFiles.map((file, index) => (
-            <tr key={index}>
+            <tr 
+            className="cursor-pointer"
+             onClick={() => handleRowClick(file.id)}
+             key={index}>
               {editMode && currentEditedFileID === file.id ? (
                 <input
+                onClick={(e)=>e.stopPropagation()}
                   className="edit-box"
                   type="text"
                   value={editedName}
@@ -216,9 +226,9 @@ const handleNextPage = () => {
                 <td>{file.name}</td>
               )}
 
-              <td className="preview">
+              <td    className="preview">
                 <a
-                  
+                  onClick={(e) => e.stopPropagation()}
                   href={file.url}
                   target="_blank"
                   rel="noreferrer"
@@ -228,21 +238,25 @@ const handleNextPage = () => {
                   <i className="fa-solid fa-cloud-arrow-down"></i>
                 </a>
               </td>
-              <td className="actions">
+              <td  className="actions flex-row gap-16 align-items-center justify-content-center">
                 <i
-                  onClick={() => handleDeleteFile(file.url, file.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteFile(file.url, file.id)
+                  }}
                   className="fa-solid fa-trash"
-                  style={{ color: "lightgrey" }}
-                ></i>
-                <i
-                  className="fa-regular fa-envelope"
                   style={{ color: "lightgrey" }}
                 ></i>
 
                 <i
-                  onClick={() => handleEditFile(file.id)}
+                  onClick={(e) =>{ e.stopPropagation()
+                     handleEditFile(file.id)
+                    }}
                   className="fa-regular fa-pen-to-square"
                 ></i>
+              </td>
+               <td className="uploaded-at xetgo-font-tag bold">
+                  {new Date(file.createdAt).toLocaleString()}
               </td>
             </tr>
           ))}

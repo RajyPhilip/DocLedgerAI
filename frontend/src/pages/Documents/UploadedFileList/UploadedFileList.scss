@@ -86,7 +86,7 @@
 
     tr {
       display: grid;
-      grid-template-columns: 3fr 1.8fr 1fr;
+      grid-template-columns: 1.8fr 1fr 0.5fr 1fr;
     }
 
     td {
@@ -96,6 +96,9 @@
     th:first-child,
     td:first-child {
       padding-left: 16px;
+      white-space: normal;
+      overflow: wrap;
+      overflow-wrap: anywhere;
     }
 
     th:last-child,

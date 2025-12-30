@@ -1,3 +1,4 @@
+import DocumentDetail from "../pages/DocumentDetail/DocumentDetail";
 import Documents from "../pages/Documents/Documents";
 import SignIn from "../pages/SignIn/SignIn";
 import SignUp from "../pages/SignUp/SignUp";
@@ -16,6 +17,11 @@ const routes = [
   {
     path: "/documents",
     Component: Documents,
+    protected: true,
+  },
+   {
+    path: "/documents/:id",
+    Component: DocumentDetail,
     protected: true,
   },
 ];

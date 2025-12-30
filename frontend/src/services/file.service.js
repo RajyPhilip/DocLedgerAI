@@ -35,12 +35,12 @@ export const handleDeleteFileFromServer = async (
 };
 
 export const editFileFromDb = async (
-  fileID,
+  id,
   fileName,
 )=> {
   try {
-    await apiClient.put(URL_CONSTANTS.DOCUMENTS.UPDATE_FILE(fileID), {
-      fileID: fileID,
+    await apiClient.put(URL_CONSTANTS.DOCUMENTS.UPDATE_FILE(id), {
+      id: id,
       fileName: fileName,
     });
   } catch (error) {
