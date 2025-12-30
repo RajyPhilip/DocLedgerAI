@@ -5,18 +5,18 @@ import URL_CONSTANTS from "../urls/Urls";
 const apiClient = ApiService().client;
 export const fileUploadSubject = new Subject();
 
-export const fetchFiles = async (
-  pageNumber,
-  searchQuery,
-) => {
+export const fetchFiles = async (pageNumber, searchQuery) => {
   try {
     const params = { pageNumber };
     if (searchQuery) {
-      params.searchQuery = searchQuery;
+      params.search = searchQuery; 
     }
-    const response = await apiClient.get(   URL_CONSTANTS.DOCUMENTS.GET, {
-      params: params,
-    });
+
+    const response = await apiClient.get(
+      URL_CONSTANTS.DOCUMENTS.GET,
+      { params }
+    );
+
     return response.data;
   } catch (error) {
     console.error("Error fetching files:", error);

@@ -1,5 +1,5 @@
 const { documents } = require("../db/schema/documents.schema");
-const { eq, desc } = require("drizzle-orm");
+const {  eq, ilike, and, desc, sql } = require("drizzle-orm");
 const { uploadPDF } = require("../services/cloudinary.service");
 const { processDocument } = require("../services/documentProcessing.service");
 const db = require("../db");
@@ -32,10 +32,9 @@ exports.uploadDocument = async (req, res) => {
       .returning();
 
     // 3️⃣ Fire-and-forget AI processing (SAFE)
-    setImmediate(() => {
-      processDocument(doc.id, doc.fileUrl).catch((err) =>
-        console.error("AI processing failed:", err)
-      );
+    process.nextTick(() => {
+      processDocument(doc.id, doc.fileUrl)
+        .catch(err => console.error("AI processing failed:", err));
     });
 
     return res.status(201).json({
@@ -50,23 +49,49 @@ exports.uploadDocument = async (req, res) => {
 
 exports.getDocuments = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
+
+    const pageNumber = Number(req.query.pageNumber) || 1;
+    const search = req.query.search || ""; 
+    const PAGE_SIZE = 10;
+    const offset = (pageNumber - 1) * PAGE_SIZE;
+
+    const whereCondition = search
+      ? and(
+          eq(documents.userId, userId),
+          ilike(documents.originalFilename, `%${search}%`)
+        )
+      : eq(documents.userId, userId);
 
     const docs = await db
-      .select()
+      .select({
+        id: documents.id,
+        name: documents.originalFilename,
+        url: documents.fileUrl,
+      })
       .from(documents)
-      .where(eq(documents.userId, userId))
-      .orderBy(desc(documents.createdAt));
+      .where(whereCondition)
+      .limit(PAGE_SIZE)
+      .offset(offset);
 
-    res.json({
+    const [{ count }] = await db
+      .select({ count: sql`count(*)::int` })
+      .from(documents)
+      .where(whereCondition);
+
+    return res.json({
       status: "success",
       data: docs,
+      totalPages: Math.ceil(count / PAGE_SIZE),
     });
   } catch (err) {
     console.error("Get documents failed:", err);
-    res.status(500).json({ message: "Failed to fetch documents" });
+    return res.status(500).json({
+      message: "Failed to fetch documents",
+    });
   }
 };
+
 
 exports.deleteDocument = async (req, res) => {
   const userId = req.user.id;

@@ -1,6 +1,6 @@
 import "./UploadedFileList.scss";
 import { toast } from "react-toastify";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   fetchFiles,
@@ -14,151 +14,151 @@ import { debounce } from "lodash";
 import { generateFileListURL } from "./UrlNavigation";
 
 const UploadedFileList = () => {
-  const [files, setFiles] = useState([]);
+ 
+   const [files, setFiles] = useState([]);
+  const [filteredFiles, setFilteredFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filteredFiles, setFilteredFiles] = useState([]);
   const [searchedText, setSearchedText] = useState("");
   const [isSearchFocused, setSearchFocused] = useState(false);
+
   const [editMode, setEditMode] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const [currentEditedFileID, setCurrentEditedFileID] = useState();
+  const [currentEditedFileID, setCurrentEditedFileID] = useState(null);
   const [fileExtension, setFileExtension] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Function to get the pageNumber from the URL
-  const getPageNumberFromUrl = () => {
-    const searchParams = new URLSearchParams(location.search);
-    const pageNumber = searchParams.get("pageNumber");
-    return pageNumber ? parseInt(pageNumber, 10) : 1;
+  /* ================= PAGE FROM URL ================= */
+
+  const getPageFromUrl = () => {
+    const params = new URLSearchParams(location.search);
+    return Number(params.get("pageNumber")) || 1;
   };
 
-  const debouncedSearch = useMemo(() => {
-    return debounce((searchText) => {
-      navigate(generateFileListURL(1, searchText));
-    }, 500);
-  }, [navigate]);
+  /* ================= FETCH ================= */
 
-  const handleSearchFile = (
-    event,
-  ) => {
-    const searchText = event.target.value;
-    setSearchedText(searchText);
-    debouncedSearch(searchText);
+  const fetchAndSetFiles = async (page, search) => {
+    try {
+      const response = await fetchFiles(page, search);
+      setFiles(response.data || []);
+      setTotalPages(response.totalPages || 1);
+    } catch (err) {
+      console.error("Fetch files failed:", err);
+    }
   };
-  useEffect(() => {
-    return () => {
-      debouncedSearch.cancel();
-    };
-  }, []);
+
+  /* ================= INITIAL LOAD & PAGE CHANGE ================= */
 
   useEffect(() => {
-    const filteredFiles = files.filter((file,ind) => {
-      return file.name?.toLowerCase().includes(searchedText.toLowerCase());
-    });
-    searchedText === ""
-      ? setFilteredFiles(files)
-      : setFilteredFiles(filteredFiles);
+    const page = getPageFromUrl();
+    setCurrentPage(page);
+    fetchAndSetFiles(page, searchedText);
+  }, [location.search]);
+
+  /* ================= DEBOUNCED SEARCH (NO URL) ================= */
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text) => {
+        fetchAndSetFiles(1, text);
+        setCurrentPage(1);
+      }, 500),
+    []
+  );
+
+  const handleSearchFile = (e) => {
+    const text = e.target.value;
+    setSearchedText(text);
+    debouncedSearch(text);
+  };
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
+
+  /* ================= CLIENT FILTER ================= */
+
+  useEffect(() => {
+    if (!searchedText) {
+      setFilteredFiles(files);
+    } else {
+      setFilteredFiles(
+        files.filter((f) =>
+          f.name?.toLowerCase().includes(searchedText.toLowerCase())
+        )
+      );
+    }
   }, [files, searchedText]);
 
-  const handleDataAfterDeletion = (deletedID) => {
-    const updatedFiles = files.filter((file) => file.id !== deletedID);
-    if (updatedFiles.length <= 0 && currentPage > 1) {
-      navigate(generateFileListURL(currentPage - 1, searchedText));
-    } else {
-      navigate(generateFileListURL(currentPage, searchedText));
-    }
-  };
+  /* ================= FILE UPLOAD REFRESH ================= */
 
-  const handlePreviousPage = () => {
-    navigate(generateFileListURL(currentPage - 1, searchedText));
-  };
+  useEffect(() => {
+    const sub = fileUploadSubject.subscribe((refresh) => {
+      if (refresh) {
+        fetchAndSetFiles(currentPage, searchedText);
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [currentPage, searchedText]);
 
-  const handleNextPage = () => {
-    navigate(generateFileListURL(currentPage + 1, searchedText));
-  };
+  /* ================= DELETE ================= */
 
-  const handleDeleteFile = async (fileUrl, fileID) => {
+  const handleDeleteFile = async (fileID) => {
     try {
       await handleDeleteFileFromServer(fileID);
-      handleDataAfterDeletion(fileID);
-      toast.success("File Deleted successfully!", toastOptions);
-    } catch (error) {
-      console.error("error", error);
+      toast.success("File deleted successfully!", toastOptions);
+      fetchAndSetFiles(currentPage, searchedText);
+    } catch (err) {
+      console.error(err);
     }
   };
+
+  /* ================= EDIT ================= */
 
   const handleEditFile = (fileId) => {
     setEditMode(true);
     setCurrentEditedFileID(fileId);
-    const editedFile = files.find((file) => file.id === fileId);
-    if (editedFile) {
-      const fileNameParts = editedFile.name.split(".");
-      const fileName = fileNameParts.slice(0, -1).join(".");
-      const fileExtension = fileNameParts.slice(-1)[0];
-      setEditedName(fileName);
-      setFileExtension(fileExtension);
-    }
+
+    const file = files.find((f) => f.id === fileId);
+    if (!file) return;
+
+    const parts = file.name.split(".");
+    setEditedName(parts.slice(0, -1).join("."));
+    setFileExtension(parts.at(-1));
   };
 
   const saveEditedName = async (fileID) => {
-    if (!editedName) {
-      return;
-    }
-    let updatedFileName = editedName;
-    const updatedFiles = files.map((file) => {
-      if (file.id === fileID) {
-        updatedFileName = editedName + "." + fileExtension;
-        return {
-          ...file,
-          name: updatedFileName,
-        };
-      }
-      return file;
-    });
-    await editFileFromDb(fileID, updatedFileName);
-    setFiles(updatedFiles);
+    if (!editedName) return;
+
+    const newName = `${editedName}.${fileExtension}`;
+    await editFileFromDb(fileID, newName);
+
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.id === fileID ? { ...f, name: newName } : f
+      )
+    );
+
     setEditMode(false);
     setEditedName("");
-    toast.success("Edited File successfully!", toastOptions);
+    toast.success("File renamed successfully!", toastOptions);
   };
 
-  const fetchAndSetFiles = async (pageNumber, searchQuery) => {
-    try {
-      const response = await fetchFiles(
-        pageNumber,
-        searchQuery,
-      );
-      setFiles(response.data||[]);
-      setTotalPages(response.totalPages);
-    } catch (error) {
-      console.error("error fetching and setting files", error);
-    }
+  /* ================= PAGINATION ================= */
+
+  const handlePreviousPage = () => {
+    const newPage = currentPage - 1;
+    navigate(generateFileListURL(newPage));
+    setCurrentPage(newPage);
   };
 
-  useEffect(() => {
-    const subscription = fileUploadSubject.subscribe(
-      async (shouldFetch) => {
-        if (shouldFetch) {
-          await fetchAndSetFiles(currentPage, searchedText);
-        }
-      },
-    );
-    return () => subscription.unsubscribe();
-  }, [currentPage, searchedText]);
-
-  useEffect(() => {
-    const currentPageNumber = getPageNumberFromUrl();
-    setCurrentPage(currentPageNumber);
-    const _searchQuery =
-      new URLSearchParams(location.search).get("search") || "";
-    setSearchedText(_searchQuery);
-    fetchAndSetFiles(currentPageNumber, _searchQuery).then((r) => {
-      return r;
-    });
-  }, [location]);
+  const handleNextPage = () => {
+    const newPage = currentPage + 1;
+    navigate(generateFileListURL(newPage));
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className="list-container">
@@ -216,6 +216,7 @@ const UploadedFileList = () => {
 
               <td className="preview">
                 <a
+                  
                   href={file.url}
                   target="_blank"
                   rel="noreferrer"
