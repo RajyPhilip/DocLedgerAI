@@ -146,3 +146,34 @@
 .edit-box:focus {
   border: 1px solid black;
 }
+
+@media screen and (max-width: 768px) {
+  .list-container{
+    .search-container {
+      #search-file-input {
+        width: 300px;
+      }
+      .fa-magnifying-glass {
+        left: 270px;
+      }
+      .result-showing-heading{
+        font-size: small;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .list-container{
+    .search-container {
+      
+      #search-file-input {
+        width: 300px;
+      }
+      .fa-magnifying-glass {
+        left: 270px;
+      }
+      
+    }
+  }
+}

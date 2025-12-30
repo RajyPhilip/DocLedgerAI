@@ -14,3 +14,18 @@
     }
   }
 }
+
+@media screen and (max-width: 768px) {
+  .documents-main-page-container {
+    .documents-content-body {
+      .documents-files-container {
+        .documents-box-background {
+          padding: 0;
+          top: 40%;
+          left: -10%;
+          height: 500px;
+        }
+      }
+    }
+  }
+}
