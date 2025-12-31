@@ -48,7 +48,9 @@ exports.processTranslation = async (documentId, fileUrl) => {
 
 exports.processSummary = async (documentId, fileUrl, source) => {
   const text = await extractTextFromPdf(fileUrl);
-  const summary = await generateSummary(text);
+  const textChunks = chunkText(text, 3000); // same as translation
+  const summary = await generateSummary(textChunks);
+
 
   await db.insert(documentAIOutputs).values({
     documentId,
