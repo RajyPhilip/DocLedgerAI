@@ -1,21 +1,22 @@
-const { getOpenAIClient } = require("../lib/openaiClient");
+const { getGeminiClient } = require("../lib/geminiClient");
 
 exports.translateTamilToEnglish = async (tamilText) => {
-  const openai = getOpenAIClient();
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: "You are a professional Tamil to English legal document translator."
-      },
-      {
-        role: "user",
-        content: tamilText
-      }
-    ],
+  const genAI = getGeminiClient();
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash", // fast + free-tier friendly
   });
 
-  return response.choices[0].message.content;
+  const prompt = `
+You are a professional legal document translator.
+Translate the following Tamil text into accurate English.
+Preserve legal meaning and structure.
+
+Tamil Text:
+${tamilText}
+`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+
+  return response.text().trim();
 };

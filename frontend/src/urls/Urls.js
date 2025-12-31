@@ -12,6 +12,9 @@ const URL_CONSTANTS = {
     UPLOAD_FILE: "/documents/upload",
     UPDATE_FILE:(id)=>`/documents/${id}`,
     DELETE:(fileID)=>`/delete-document/${fileID}`,
+    TRANSLATE: (id) => `/documents/${id}/translate`,
+    GENERATE_SUMMARY: (id) => `/documents/${id}/summary`,
+    EXTRACT_DATA: (id) => `/documents/${id}/extract`,
   },
   
 };

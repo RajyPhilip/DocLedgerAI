@@ -93,13 +93,15 @@ function FileUpload() {
   const handleUpload = async () => {
     if (selectedFiles.length > 0) {
       const formData = new FormData();
-      selectedFiles.forEach((file, index) => {
-        formData.append("files[]", file);
-        const displayName = displayNames[index]?.trim();
-        if (displayName) {
-          formData.append("displayNames[]", displayName);
+        formData.append("file", selectedFiles[0]);
+        if(editingFileName.length>0){
+          console.log('Edited name sent at backend',editingFileName)
+        formData.append("displayName", editingFileName.trim());
+        }else{
+          console.log('original file name  sent at backend',displayNames[0].trim())
+        formData.append("displayName", displayNames[0]?.trim());
         }
-      });
+      
 
       try {
         console.log("Uploading files...", );
@@ -111,6 +113,7 @@ function FileUpload() {
         toast.success("Upload successful!", toastOptions);
         setSelectedFiles([]);
         setDisplayNames([]);
+        setEditingFileName('')
       } catch (error) {
         console.error(error);
         toast.error("Upload failed. Please try again.", toastOptions);

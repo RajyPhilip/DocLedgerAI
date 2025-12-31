@@ -1,27 +1,30 @@
 const axios = require("axios");
 const pdfParse = require("pdf-parse");
 
-/**
- * Extract raw text from a PDF URL
- */
-exports.extractTextFromPDF = async (pdfUrl) => {
+exports.extractTextFromPdf = async (pdfUrl) => {
   try {
-    // 1️⃣ Download PDF
+    console.log("🔍 Extracting PDF from:", pdfUrl);
+
     const response = await axios.get(pdfUrl, {
       responseType: "arraybuffer",
+      headers: {
+        Accept: "application/pdf",
+      },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
 
-    // 2️⃣ Parse PDF
+    const contentType = response.headers["content-type"];
+    if (!contentType?.includes("pdf")) {
+      console.error("❌ Not a PDF. Content-Type:", contentType);
+      throw new Error("Invalid PDF file");
+    }
+
     const pdfData = await pdfParse(response.data);
 
-    // 3️⃣ Clean text
-    const text = pdfData.text
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return text;
+    return pdfData.text.replace(/\s+/g, " ").trim();
   } catch (error) {
-    console.error("PDF extraction failed:", error);
+    console.error("❌ PDF extraction failed:", error.message);
     throw new Error("Failed to extract PDF text");
   }
 };

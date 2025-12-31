@@ -1,7 +1,7 @@
 const PDFDocument = require("pdfkit");
 const streamBuffers = require("stream-buffers");
 
-exports.generateTranslatedPDF = async (text) => {
+exports.generateTranslatedPdf = async (text) => {
   return new Promise((resolve) => {
     const doc = new PDFDocument({ margin: 50 });
     const bufferStream = new streamBuffers.WritableStreamBuffer();

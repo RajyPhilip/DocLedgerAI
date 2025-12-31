@@ -8,38 +8,104 @@ import { SAMPLE_DOCUMENT_DETAIL } from "./DucomentDetail.data";
 import { toast } from "react-toastify";
 
 const DocumentDetail = () => {
-  const { id } = useParams();
-  const [ifTranslatedPdfAvailable, setIfTranslatedPdfAvailable] = useState(false); 
+ 
+    const { id } = useParams();
+
+  const apiClient = ApiService().client;
+
   const [documentDetail, setDocumentDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [extractingData, setExtractingData] = useState(false);
+  const [translatingPdf, setTranslatingPdf] = useState(false);
+  const [ifTranslatedPdfAvailable, setIfTranslatedPdfAvailable] = useState(false);
 
+  /* ================= FETCH DOCUMENT ================= */
 
   const fetchDocumentDetail = async (documentId) => {
     try {
       setLoading(true);
-      const apiClient = ApiService().client;
       const response = await apiClient.get(
         URL_CONSTANTS.DOCUMENTS.GET_DETAIL(documentId)
       );
-      
-      const data = response.data?.data;
-      setDocumentDetail(data);
-      console.log("Fetched document detail:", data);
-    
+      setDocumentDetail(response.data?.data || null);
     } catch (err) {
-      console.error("Error fetching document detail:", err);
-      toast.error("Failed to load document details. Please try again later.");
+      console.error(err);
+      toast.error("Failed to load document details");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (id) {
-      fetchDocumentDetail(id);
-    }
+    if (id) fetchDocumentDetail(id);
   }, [id]);
+
+  useEffect(() => {
+    setIfTranslatedPdfAvailable(!!documentDetail?.translatedFileUrl);
+  }, [documentDetail]);
+
+  /* ================= HELPERS ================= */
+
+  const openInNewTab = (url) => {
+    if (!url) return toast.error("File not available");
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const downloadFile = (url, filename) => {
+    if (!url) return toast.error("File not available");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "document.pdf";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  /* ================= ACTIONS ================= */
+
+  const handleTranslatePdf = async () => {
+    try {
+      console.log('TRanslated pdf ')
+      setTranslatingPdf(true);
+      const result = await apiClient.post(URL_CONSTANTS.DOCUMENTS.TRANSLATE(id));
+      // recive the url from backend and update document details addd translatedurl of the url that we will get from backend 
+      toast.success("Translation started");
+      // setTimeout(() => fetchDocumentDetail(id), 3000);
+    } catch(err) {
+      console.error('Error Translating PDF',err)
+      toast.error("Failed to translate PDF");
+    } finally {
+      setTranslatingPdf(false);
+    }
+  };
+
+  const handleGenerateSummary = async () => {
+    try {
+      setGeneratingSummary(true);
+      await apiClient.post(URL_CONSTANTS.DOCUMENTS.GENERATE_SUMMARY(id));
+      toast.success("Summary generation started");
+      setTimeout(() => fetchDocumentDetail(id), 3000);
+    } catch {
+      toast.error("Failed to generate summary");
+    } finally {
+      setGeneratingSummary(false);
+    }
+  };
+
+  const handleExtractData = async () => {
+    try {
+      setExtractingData(true);
+      await apiClient.post(URL_CONSTANTS.DOCUMENTS.EXTRACT_DATA(id));
+      toast.success("Extraction started");
+      setTimeout(() => fetchDocumentDetail(id), 3000);
+    } catch {
+      toast.error("Failed to extract data");
+    } finally {
+      setExtractingData(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -66,7 +132,7 @@ const DocumentDetail = () => {
           <div className="flex-column gap-8">
             <div className="flex-row gap-8 align-items-center">
               <i   class="fa-regular fa-file-pdf"></i>
-              <span className="xetgo-font-h2">{documentDetail?.fileName || "Document"}</span>
+              <span className="xetgo-font-h2"> {documentDetail?.originalFilename || 'Document'}</span>
             </div>
             <div className="document-meta flex-row gap-24 align-items-center xetgo-font-button">
               <div className="flex-row gap-8 align-items-center">
@@ -79,7 +145,7 @@ const DocumentDetail = () => {
                 <span  style={{
                   color: '#f59e0b'
                 }}>
-                  Uploaded
+                   {documentDetail?.status}
                 </span>
               </div>
             </div>
@@ -107,13 +173,20 @@ const DocumentDetail = () => {
                   <div className="pdf-actions flex-row gap-12 justify-content-space-between align-items-center">
                         <div 
                           className="action-btn primary bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
+                          onClick={() => openInNewTab(documentDetail?.fileUrl)}
                         >
                          <i class="fa-regular fa-eye"></i>
                           Preview in New Tab
                         </div>
                         <div 
                           className="action-btn bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
-                        >
+                          onClick={() =>
+                            downloadFile(
+                              documentDetail?.fileUrl,
+                              documentDetail?.originalFilename
+                            )
+                          }
+                       >
                           <i class="fa-solid fa-download"></i>
                           Download PDF
                         </div>
@@ -149,12 +222,21 @@ const DocumentDetail = () => {
                   <div className="pdf-actions flex-row gap-12 justify-content-space-between align-items-center">
                         <div 
                           className="action-btn primary bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
+                          onClick={() =>
+                            openInNewTab(documentDetail?.translatedFileUrl)
+                          }
                         >
                          <i class="fa-regular fa-eye"></i>
                           Preview in New Tab
                         </div>
                         <div 
                           className="action-btn bold px-16 py-8 cursor-pointer flex-row align-items-center justify-content-center gap-4 xetgo-font-button"
+                          onClick={() =>
+                            downloadFile(
+                              documentDetail?.translatedFileUrl,
+                              `translated_${documentDetail?.originalFilename}`
+                            )
+                          }
                         >
                           <i class="fa-solid fa-download"></i>
                           Download PDF
@@ -176,7 +258,12 @@ const DocumentDetail = () => {
                <i class="fa-brands fa-autoprefixer fa-4x"></i>
               <i class="fa-solid fa-arrow-down-up-across-line fa-2x"></i>
              </div>
-<div className="translate-pdf-btn px-20 py-12 flex-row align-items-center justify-content-space-between gap-8"> <i class="fa-solid fa-language"></i> <p>Translate PDF</p> </div>
+          <div
+           onClick={handleTranslatePdf}
+           className="translate-pdf-btn px-20 py-12 flex-row align-items-center justify-content-space-between gap-8"> 
+            <i class="fa-solid fa-language"></i> 
+            <p>{translatingPdf ? "Translating..." : "Translate PDF"}</p>
+          </div>
             </div>
           </div>
           }
@@ -223,7 +310,9 @@ const DocumentDetail = () => {
                   </p>
                   <div 
                     className="generate-btn xetgo-font-button bolder px-24 py-12 bold cursor-pointer flex-row align-items-center justify-content-center gap-8"
+                    onClick={handleGenerateSummary}
                   >
+                   
                     {generatingSummary ? (
                       <>
                         <div className="btn-spinner" style={{ marginRight: '8px' }}></div>

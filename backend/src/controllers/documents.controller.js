@@ -13,19 +13,16 @@ exports.uploadDocument = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    if (!req.files?.length) {
-      return res.status(400).json({ message: "File required" });
-    }
-
-    const file = req.files[0];
-
-    const fileUrl = await uploadPDF(file.buffer, file.originalname);
+    const file = req.file;
+    const fileName = req.body.displayName || file.originalname
+    console.log('File name ,,',req.displayName )
+    const fileUrl = await uploadPDF(file.buffer, fileName);
 
     const [doc] = await db.insert(documents).values({
       userId,
-      originalFilename: file.originalname,
+      originalFilename: fileName,
       fileUrl,
-      status: "UPLOADED",
+      status: "Uploaded",
     }).returning();
 
     // fire-and-forget AI pipeline

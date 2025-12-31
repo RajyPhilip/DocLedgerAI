@@ -30,13 +30,6 @@ const UploadedFileList = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  /* ================= PAGE FROM URL ================= */
-
-  const getPageFromUrl = () => {
-    const params = new URLSearchParams(location.search);
-    return Number(params.get("pageNumber")) || 1;
-  };
-
   /* ================= FETCH ================= */
 
   const fetchAndSetFiles = async (page, search) => {

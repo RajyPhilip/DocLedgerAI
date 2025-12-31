@@ -1,6 +1,6 @@
 const { extractTextFromPdf } = require("../services/pdfExtract.service");
-const { translateText } = require("../services/translation.service");
-const { generateTranslatedPDF } = require("../services/pdf.service");
+const { translateTamilToEnglish  } = require("../services/translation.service");
+const { generateTranslatedPdf } = require("../services/pdf.service");
 const { generateSummary } = require("../services/summarization.service");
 const { extractStructuredData } = require("../services/aiExtraction.service");
 
@@ -16,9 +16,9 @@ const db = require("../db");
 
 exports.processTranslation = async (documentId, fileUrl) => {
   const extractedText = await extractTextFromPdf(fileUrl);
-  const translatedText = await translateText(extractedText);
+  const translatedText = await translateTamilToEnglish (extractedText);
 
-  const translatedPdfBuffer = await generateTranslatedPDF(translatedText);
+  const translatedPdfBuffer = await generateTranslatedPdf(translatedText);
 
   const translatedPdfUrl = await uploadPDF(
     translatedPdfBuffer,
