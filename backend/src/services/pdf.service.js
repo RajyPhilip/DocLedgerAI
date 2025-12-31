@@ -1,16 +1,17 @@
-const pdfParse = require("pdf-parse");
-const axios = require("axios");
+const PDFDocument = require("pdfkit");
+const streamBuffers = require("stream-buffers");
 
-exports.extractTextFromPdfUrl = async (pdfUrl) => {
-  // 1️ Download PDF as buffer
-  const response = await axios.get(pdfUrl, {
-    responseType: "arraybuffer",
+exports.generateTranslatedPDF = async (text) => {
+  return new Promise((resolve) => {
+    const doc = new PDFDocument({ margin: 50 });
+    const bufferStream = new streamBuffers.WritableStreamBuffer();
+
+    doc.pipe(bufferStream);
+    doc.fontSize(12).text(text, { lineGap: 6 });
+    doc.end();
+
+    bufferStream.on("finish", () => {
+      resolve(bufferStream.getContents());
+    });
   });
-
-  const pdfBuffer = Buffer.from(response.data);
-
-  // 2️ Extract text
-  const parsed = await pdfParse(pdfBuffer);
-
-  return parsed.text?.trim() || "";
 };

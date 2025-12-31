@@ -1,20 +1,16 @@
-const { pgTable, serial, integer, text, jsonb } = require("drizzle-orm/pg-core");
-import { documents } from "./documents.schema";
+const { pgTable, serial, integer, jsonb, text, timestamp } = require("drizzle-orm/pg-core");
+const { documents } = require("./documents.schema");
 
-export const documentTransactions = pgTable("document_transactions", {
+exports.documentTransactions = pgTable("document_transactions", {
   id: serial("id").primaryKey(),
+
   documentId: integer("document_id")
-    .references(() => documents.id)
+    .references(() => documents.id, { onDelete: "cascade" })
     .notNull(),
 
-  docNo: text("doc_no"),
-  executionDate: text("execution_date"),
-  registrationDate: text("registration_date"),
-  nature: text("nature"),
-  considerationValue: text("consideration_value"),
-  marketValue: text("market_value"),
+  extractedJson: jsonb("extracted_json").notNull(),
 
-  surveyNumbers: jsonb("survey_numbers"),
-  plotNumber: text("plot_number"),
-  extent: text("extent"),
+  source: text("source"), // "translated" | "original"
+
+  createdAt: timestamp("created_at").defaultNow(),
 });

@@ -1,7 +1,10 @@
 const { documents } = require("../db/schema/documents.schema");
 const {  eq, ilike, and, desc, sql } = require("drizzle-orm");
 const { uploadPDF } = require("../services/cloudinary.service");
-const { processDocument } = require("../services/documentProcessing.service");
+// const { processDocument } = require("../documentProcessing.controller");
+const { processTranslation } = require("./documentProcessing.controller");
+const { documentAIOutputs } = require("../db/schema/document_ai_outputs.schema");
+const { documentTransactions } = require("../db/schema/document_transactions.schema");
 const db = require("../db");
 
 const PAGE_SIZE = 10;
@@ -10,42 +13,30 @@ exports.uploadDocument = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "File is required" });
+    if (!req.files?.length) {
+      return res.status(400).json({ message: "File required" });
     }
 
     const file = req.files[0];
-    const originalFilename = Array.isArray(req.body.displayNames)
-      ? req.body.displayNames[0]
-      : file.originalname;
 
-    // 1️⃣ Upload PDF
-    const fileUrl = await uploadPDF(file.buffer, originalFilename);
+    const fileUrl = await uploadPDF(file.buffer, file.originalname);
 
-    // 2️⃣ Save document
-    const [doc] = await db
-      .insert(documents)
-      .values({
-        userId,
-        originalFilename,
-        fileUrl,
-        status: "UPLOADED",
-      })
-      .returning();
+    const [doc] = await db.insert(documents).values({
+      userId,
+      originalFilename: file.originalname,
+      fileUrl,
+      status: "UPLOADED",
+    }).returning();
 
-    // 3️⃣ Fire-and-forget AI processing (SAFE)
-    process.nextTick(() => {
-      processDocument(doc.id, doc.fileUrl)
-        .catch(err => console.error("AI processing failed:", err));
-    });
+    // fire-and-forget AI pipeline
+    // process.nextTick(() =>
+    //   processDocument(doc.id, doc.fileUrl).catch(console.error)
+    // );
 
-    return res.status(201).json({
-      status: "success",
-      data: doc,
-    });
+    res.status(201).json({ status: "success", data: doc });
   } catch (err) {
-    console.error("Upload failed:", err);
-    return res.status(500).json({ message: "Upload failed" });
+    console.error(err);
+    res.status(500).json({ message: "Upload failed" });
   }
 };
 
@@ -161,12 +152,172 @@ exports.updateDocumentName = async (req, res) => {
 };
 
 exports.deleteDocument = async (req, res) => {
-  const userId = req.user.id;
-  const docId = Number(req.params.id);
+  try {
+    const userId = req.user.userId;
+    const docId = Number(req.params.id);
 
-  await db
-    .delete(documents)
-    .where(eq(documents.id, docId));
+    const result = await db
+      .delete(documents)
+      .where(
+        and(
+          eq(documents.id, docId),
+          eq(documents.userId, userId)
+        )
+      )
+      .returning();
 
-  res.json({ status: "success" });
+    if (result.length === 0) {
+      return res.status(404).json({
+        message: "Document not found or access denied",
+      });
+    }
+
+    res.json({ status: "success" });
+  } catch (err) {
+    console.error("Delete document failed:", err);
+    res.status(500).json({ message: "Delete failed" });
+  }
+};
+
+exports.getDocumentDetail = async (req, res) => {
+  try {
+    const documentId = Number(req.params.id);
+
+    if (!documentId || isNaN(documentId)) {
+      return res.status(400).json({ message: "Invalid document id" });
+    }
+
+    const [doc] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, documentId));
+
+    if (!doc) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    const [summary] = await db
+      .select()
+      .from(documentAIOutputs)
+      .where(eq(documentAIOutputs.documentId, documentId))
+      .orderBy(desc(documentAIOutputs.createdAt))
+      .limit(1);
+
+    const [extracted] = await db
+      .select()
+      .from(documentTransactions)
+      .where(eq(documentTransactions.documentId, documentId))
+      .orderBy(desc(documentTransactions.createdAt))
+      .limit(1);
+
+    return res.json({
+      status: "success",
+      data: {
+        ...doc,
+
+        summary: summary?.summary ?? null,
+        summarySource: summary?.source ?? null,
+
+        extractedJson: extracted?.extractedJson ?? null,
+        extractedSource: extracted?.source ?? null,
+      },
+    });
+  } catch (err) {
+    console.error("Get document detail failed:", err);
+    return res.status(500).json({
+      message: "Failed to fetch document detail",
+    });
+  }
+};
+
+exports.translateDocument = async (req, res) => {
+  const documentId = Number(req.params.id);
+
+  const [doc] = await db
+    .select()
+    .from(documents)
+    .where(eq(documents.id, documentId));
+
+  if (!doc) {
+    return res.status(404).json({ message: "Document not found" });
+  }
+
+  if (doc.translatedFileUrl) {
+    return res.json({
+      status: "success",
+      translatedFileUrl: doc.translatedFileUrl,
+    });
+  }
+
+  processTranslation(documentId, doc.fileUrl);
+
+  res.json({
+    status: "success",
+    message: "Translation started",
+  });
+};
+
+exports.generateSummary = async (req, res) => {
+  try {
+    const documentId = Number(req.params.id);
+
+    const [doc] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, documentId));
+
+    if (!doc) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    const source = doc.translatedFileUrl ? "translated" : "original";
+    const fileUrl = doc.translatedFileUrl || doc.fileUrl;
+
+    process.nextTick(() => {
+      processSummary(documentId, fileUrl, source)
+        .catch(err =>
+          console.error(`Summary failed for document ${documentId}`, err)
+        );
+    });
+
+    res.json({
+      status: "success",
+      message: "Summary generation started",
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Summary failed" });
+  }
+};
+
+exports.extractData = async (req, res) => {
+  try {
+    const documentId = Number(req.params.id);
+
+    const [doc] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, documentId));
+
+    if (!doc) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    const source = doc.translatedFileUrl ? "translated" : "original";
+    const fileUrl = doc.translatedFileUrl || doc.fileUrl;
+
+    process.nextTick(() => {
+      processExtraction(documentId, fileUrl, source)
+        .catch(err =>
+          console.error(`Extraction failed for document ${documentId}`, err)
+        );
+    });
+
+    res.json({
+      status: "success",
+      message: "Extraction started",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Extraction failed" });
+  }
 };
