@@ -196,12 +196,12 @@ exports.getDocumentDetail = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    const [summary] = await db
-      .select()
-      .from(documentAIOutputs)
-      .where(eq(documentAIOutputs.documentId, documentId))
-      .orderBy(desc(documentAIOutputs.createdAt))
-      .limit(1);
+      const [summary] = await db
+        .select()
+        .from(documentAIOutputs)
+        .where(eq(documentAIOutputs.documentId, documentId))
+        .orderBy(desc(documentAIOutputs.createdAt))
+        .limit(1);
 
     const [extracted] = await db
       .select()
@@ -215,8 +215,7 @@ exports.getDocumentDetail = async (req, res) => {
       data: {
         ...doc,
 
-        summary: summary?.summary ?? null,
-        summarySource: summary?.source ?? null,
+        summary: summary?.summaryText || null,
 
         extractedJson: extracted?.extractedJson ?? null,
         extractedSource: extracted?.source ?? null,

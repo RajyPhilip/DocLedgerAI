@@ -40,8 +40,7 @@ exports.processSummary = async (documentId, fileUrl, source) => {
 
   await db.insert(documentAIOutputs).values({
     documentId,
-    summary,
-    source,
+    summary_text,
   });
 };
 
