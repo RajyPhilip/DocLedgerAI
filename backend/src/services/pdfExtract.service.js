@@ -7,24 +7,23 @@ exports.extractTextFromPdf = async (pdfUrl) => {
 
     const response = await axios.get(pdfUrl, {
       responseType: "arraybuffer",
-      headers: {
-        Accept: "application/pdf",
-      },
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
     });
 
-    const contentType = response.headers["content-type"];
-    if (!contentType?.includes("pdf")) {
-      console.error("❌ Not a PDF. Content-Type:", contentType);
-      throw new Error("Invalid PDF file");
+    const contentType = response.headers["content-type"] || "";
+    if (!contentType.includes("pdf")) {
+      throw new Error(`Not a PDF. Content-Type: ${contentType}`);
     }
 
-    const pdfData = await pdfParse(response.data);
+    const parsed = await pdfParse(response.data);
 
-    return pdfData.text.replace(/\s+/g, " ").trim();
-  } catch (error) {
-    console.error("❌ PDF extraction failed:", error.message);
+    return parsed.text
+      .replace(/\s+/g, " ")
+      .trim();
+
+  } catch (err) {
+    console.error("❌ PDF extraction failed:", err.message);
     throw new Error("Failed to extract PDF text");
   }
 };

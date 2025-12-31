@@ -1,17 +1,22 @@
+
+
 const PDFDocument = require("pdfkit");
-const streamBuffers = require("stream-buffers");
 
-exports.generateTranslatedPdf = async (text) => {
+exports.generateTranslatedPdf = async (translatedText) => {
   return new Promise((resolve) => {
-    const doc = new PDFDocument({ margin: 50 });
-    const bufferStream = new streamBuffers.WritableStreamBuffer();
+    const doc = new PDFDocument({ margin: 40 });
+    const buffers = [];
 
-    doc.pipe(bufferStream);
-    doc.fontSize(12).text(text, { lineGap: 6 });
-    doc.end();
-
-    bufferStream.on("finish", () => {
-      resolve(bufferStream.getContents());
+    doc.on("data", buffers.push.bind(buffers));
+    doc.on("end", () => {
+      resolve(Buffer.concat(buffers));
     });
+
+    doc.fontSize(11).text(translatedText, {
+      align: "left",
+      lineGap: 4,
+    });
+
+    doc.end();
   });
 };

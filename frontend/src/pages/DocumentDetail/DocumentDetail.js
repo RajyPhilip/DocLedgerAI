@@ -47,20 +47,21 @@ const DocumentDetail = () => {
 
   /* ================= HELPERS ================= */
 
-  const openInNewTab = (url) => {
-    if (!url) return toast.error("File not available");
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
+ const openInNewTab = (url) => {
+  if (!url) return toast.error("File not available");
+  window.open(url, "_blank", "noopener,noreferrer");
+};
 
-  const downloadFile = (url, filename) => {
-    if (!url) return toast.error("File not available");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename || "document.pdf";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+ const downloadFile = (url, filename) => {
+  if (!url) return toast.error("File not available");
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename; // ✅ filename respected
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
 
   /* ================= ACTIONS ================= */
 

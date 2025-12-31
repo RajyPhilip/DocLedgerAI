@@ -245,7 +245,9 @@ exports.translateDocument = async (req, res) => {
     });
   }
 
-  processTranslation(documentId, doc.fileUrl);
+  process.nextTick(() =>
+    processTranslation(documentId, doc.fileUrl).catch(console.error)
+  );
 
   res.json({
     status: "success",
