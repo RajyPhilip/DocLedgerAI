@@ -8,8 +8,26 @@ const { documentTransactions } = require("../db/schema/document_transactions.sch
 const { documents } = require("../db/schema/documents.schema");
 const { chunkText } = require("../utils/textChunker");
 const { uploadPDF } = require("../services/cloudinary.service");
-const { eq } = require("drizzle-orm");
+const { eq, and, desc } = require("drizzle-orm");
 const db = require("../db");
+const { documentTexts } = require("../db/schema/document_texts.schema");
+
+const SAMPLE_SUMMARY = `
+This document appears to be a legal real estate related agreement.
+It contains details about ownership, registration, and monetary value.
+(This is sample summary due to AI quota limitations.)
+`;
+
+const SAMPLE_EXTRACTION = {
+  buyer: "Sample Buyer",
+  seller: "Sample Seller",
+  house_no: "123",
+  survey_no: "45A",
+  document_no: "DOC-XXXX",
+  date: "2024-01-01",
+  value: "₹10,00,000",
+  note: "Sample data due to AI quota limit"
+};
 
 /* ================= TRANSLATION ================= */
 
@@ -46,26 +64,93 @@ exports.processTranslation = async (documentId, fileUrl) => {
   console.log("✅ Translation completed:", translatedPdfUrl);
 };
 
-exports.processSummary = async (documentId, fileUrl, source) => {
-  const text = await extractTextFromPdf(fileUrl);
-  const textChunks = chunkText(text, 3000); // same as translation
-  const summary = await generateSummary(textChunks);
+exports.processSummary = async (documentId) => {
+  const [docText] = await db
+    .select()
+    .from(documentTexts)
+    .where(
+      and(
+        eq(documentTexts.documentId, documentId),
+        eq(documentTexts.type, "original")
+      )
+    )
+    .orderBy(desc(documentTexts.createdAt))
+    .limit(1);
 
+  // ✅ DO NOT THROW — FALL BACK
+  if (!docText?.content) {
+    console.error("⚠️ Extracted text not found, saving sample summary");
 
-  await db.insert(documentAIOutputs).values({
-    documentId,
-    summary_text:summary,
-  });
+    await db.insert(documentAIOutputs).values({
+      documentId,
+      summaryText: SAMPLE_SUMMARY,
+      isSample: true,
+    });
+
+    return;
+  }
+
+  try {
+    const summary = await generateSummary(docText.content);
+
+    await db.insert(documentAIOutputs).values({
+      documentId,
+      summaryText: summary,
+      isSample: false,
+    });
+
+  } catch (err) {
+    console.error("❌ Gemini summary failed, saving sample");
+
+    await db.insert(documentAIOutputs).values({
+      documentId,
+      summaryText: SAMPLE_SUMMARY,
+      isSample: true,
+    });
+  }
 };
 
-exports.processExtraction = async (documentId, fileUrl, source) => {
-  const text = await extractTextFromPdf(fileUrl);
-  const extractedJson = await extractStructuredData(text);
+exports.processExtraction = async (documentId) => {
+  const [docText] = await db
+    .select()
+    .from(documentTexts)
+    .where(
+      and(
+        eq(documentTexts.documentId, documentId),
+        eq(documentTexts.type, "original")
+      )
+    )
+    .orderBy(desc(documentTexts.createdAt))
+    .limit(1);
 
-  await db.insert(documentTransactions).values({
-    documentId,
-    extractedJson,
-    source,
-  });
+  if (!docText?.content) {
+    console.error("⚠️ Extracted text not found, saving sample extraction");
+
+    await db.insert(documentTransactions).values({
+      documentId,
+      extractedJson: SAMPLE_EXTRACTION,
+      isSample: true,
+    });
+
+    return;
+  }
+
+  try {
+    const extractedJson = await extractStructuredData(docText.content);
+
+    await db.insert(documentTransactions).values({
+      documentId,
+      extractedJson,
+      isSample: false,
+    });
+
+  } catch (err) {
+    console.error("❌ Gemini extraction failed, saving sample");
+
+    await db.insert(documentTransactions).values({
+      documentId,
+      extractedJson: SAMPLE_EXTRACTION,
+      isSample: true,
+    });
+  }
 };
-

@@ -2,33 +2,49 @@ const { documents } = require("../db/schema/documents.schema");
 const {  eq, ilike, and, desc, sql } = require("drizzle-orm");
 const { uploadPDF } = require("../services/cloudinary.service");
 // const { processDocument } = require("../documentProcessing.controller");
-const { processTranslation, processSummary } = require("./documentProcessing.controller");
+const { processTranslation, processSummary, processExtraction } = require("./documentProcessing.controller");
 const { documentAIOutputs } = require("../db/schema/document_ai_outputs.schema");
 const { documentTransactions } = require("../db/schema/document_transactions.schema");
+
 const db = require("../db");
+const { extractTextFromPdf } = require("../services/pdfExtract.service");
 
 const PAGE_SIZE = 10;
 
 exports.uploadDocument = async (req, res) => {
   try {
     const userId = req.user.userId;
-
     const file = req.file;
-    const fileName = req.body.displayName || file.originalname
-    console.log('File name ,,',req.displayName )
+
+    const fileName = req.body.displayName || file.originalname;
     const fileUrl = await uploadPDF(file.buffer, fileName);
 
     const [doc] = await db.insert(documents).values({
       userId,
       originalFilename: fileName,
       fileUrl,
-      status: "Uploaded",
+      status: "UPLOADED",
     }).returning();
 
-    // fire-and-forget AI pipeline
-    // process.nextTick(() =>
-    //   processDocument(doc.id, doc.fileUrl).catch(console.error)
-    // );
+    // 🔥 Extract text ONCE and SAVE PROPERLY
+    process.nextTick(async () => {
+      try {
+        const extractedText = await extractTextFromPdf(fileUrl);
+
+        await db.insert(documentTexts).values({
+          documentId: doc.id,
+          content: extractedText,     // ✅ FIX
+          language: "original",
+          type: "original",
+        });
+
+        console.log("✅ Extracted text saved for doc", doc.id);
+        console.log("✅ Extracted TEXXTT", extractedText);
+
+      } catch (err) {
+        console.error("❌ Text extraction failed:", err.message);
+      }
+    });
 
     res.status(201).json({ status: "success", data: doc });
   } catch (err) {
@@ -36,6 +52,7 @@ exports.uploadDocument = async (req, res) => {
     res.status(500).json({ message: "Upload failed" });
   }
 };
+
 
 exports.getDocuments = async (req, res) => {
   try {
@@ -216,6 +233,8 @@ exports.getDocumentDetail = async (req, res) => {
 
         extractedJson: extracted?.extractedJson ?? null,
         extractedSource: extracted?.source ?? null,
+        summaryIsSample: summary?.isSample ?? false,
+        extractedIsSample: extracted?.isSample ?? false,
       },
     });
   } catch (err) {

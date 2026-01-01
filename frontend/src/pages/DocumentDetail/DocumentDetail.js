@@ -297,7 +297,9 @@ const DocumentDetail = () => {
                       {/* {documentDetail.summary.split('\n').map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                       ))} */}
-                      summary text present here
+                      {documentDetail.summary.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
                     </div>
                   </div>
                 </>
@@ -340,7 +342,7 @@ const DocumentDetail = () => {
     </div>
   </div>
   <div className="card-content scrollable">
-    {false ? (
+    {documentDetail.extractedJson ? (
       <>
         <div className="data-source-info">
           <span className=" xetgo-font-caption bolder">Extracted from: </span>
@@ -357,17 +359,18 @@ const DocumentDetail = () => {
               </tr>
             </thead>
             <tbody>
-              {SAMPLE_DOCUMENT_DETAIL.extractedJson.transactions.map((transaction, index) => (
-                <tr key={index}>
+              { documentDetail?.extractedJson &&
+    typeof documentDetail.extractedJson === "object" && Object.entries(documentDetail.extractedJson).map(([key,value]) => (
+                <tr key={key}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <i class="fa-solid fa-angle-right"></i>
-                      {transaction.key}
+                      {key}
                     </div>
                   </td>
                   <td>
                     { 
-                      transaction.value
+                      value
                     }
                   </td>
                 </tr>
@@ -386,6 +389,7 @@ const DocumentDetail = () => {
         </p>
         <div 
           className="generate-btn xetgo-font-button bolder px-24 py-12 bold cursor-pointer flex-row align-items-center justify-content-center gap-8"
+         onClick={handleExtractData}
         >
           <>
             <i class="fa-regular fa-note-sticky"></i>
