@@ -65,7 +65,6 @@ const DocumentDetail = () => {
 
   const handleTranslatePdf = async () => {
     try {
-      console.log('TRanslated pdf ')
        setDocumentDetail((prev) => {
       if (!prev) return prev;
 

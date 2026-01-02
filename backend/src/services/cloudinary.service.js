@@ -32,7 +32,6 @@ exports.deletePdf = async (fileUrl) => {
   if (!fileUrl) return;
 
   try {
-    console.log("🗑️ Deleting Cloudinary file:", fileUrl);
 
     // Extract path AFTER /upload/
     const uploadIndex = fileUrl.indexOf("/upload/");
@@ -46,7 +45,6 @@ exports.deletePdf = async (fileUrl) => {
     // Remove extension (.pdf)
     const publicId = publicPath.replace(".pdf", "");
 
-    console.log("🧹 Public ID:", publicId);
 
     await cloudinary.uploader.destroy(publicId, {
       resource_type: "raw", // ✅ MUST MATCH upload

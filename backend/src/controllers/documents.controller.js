@@ -39,9 +39,6 @@ exports.uploadDocument = async (req, res) => {
           type: "original",
         });
 
-        console.log("✅ Extracted text saved for doc", doc.id);
-        console.log("✅ Extracted TEXXTT", extractedText);
-
       } catch (err) {
         console.error("❌ Text extraction failed:", err.message);
       }
@@ -189,7 +186,6 @@ exports.deleteDocument = async (req, res) => {
     }
 
     // 2️⃣ Delete from Cloudinary
-    console.log('DOCUMENT FOUN DEL FROM CLOUD')
     try {
       await deletePdf(doc.fileUrl);
       if (doc.translatedFileUrl) {

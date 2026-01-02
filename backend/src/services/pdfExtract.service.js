@@ -3,7 +3,6 @@ const pdfParse = require("pdf-parse");
 
 exports.extractTextFromPdf = async (pdfUrl) => {
   try {
-    console.log("🔍 Extracting PDF from:", pdfUrl);
 
     const response = await axios.get(pdfUrl, {
       responseType: "arraybuffer",

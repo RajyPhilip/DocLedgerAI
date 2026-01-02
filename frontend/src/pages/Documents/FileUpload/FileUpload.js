@@ -95,16 +95,13 @@ function FileUpload() {
       const formData = new FormData();
         formData.append("file", selectedFiles[0]);
         if(editingFileName.length>0){
-          console.log('Edited name sent at backend',editingFileName)
         formData.append("displayName", editingFileName.trim());
         }else{
-          console.log('original file name  sent at backend',displayNames[0].trim())
         formData.append("displayName", displayNames[0]?.trim());
         }
       
 
       try {
-        console.log("Uploading files...", );
         setLoading(true);
         setIsPreviewDialogOpen(false);
         await api.client.post(URL_CONSTANTS.DOCUMENTS.UPLOAD_FILE, formData);

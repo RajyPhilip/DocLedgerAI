@@ -33,7 +33,6 @@ const SAMPLE_EXTRACTION = {
 /* ================= TRANSLATION ================= */
 
 exports.processTranslation = async (documentId, fileUrl) => {
-  console.log("🚀 Translation started:", documentId);
 
   // 1️⃣ Mark as translating
   await db.update(documents)
@@ -87,8 +86,6 @@ exports.processTranslation = async (documentId, fileUrl) => {
         )
       );
 
-    console.log("✅ Translation completed:", documentId);
-
   } catch (err) {
     completed = true;
     clearTimeout(timeoutId);
@@ -102,7 +99,6 @@ exports.processTranslation = async (documentId, fileUrl) => {
 };
 
 exports.processSummary = async (documentId) => {
-  console.log("📝 Summary started:", documentId);
 
   await db.update(documents)
     .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARIZING })
@@ -172,7 +168,6 @@ exports.processSummary = async (documentId) => {
         )
       );
 
-    console.log("✅ Summary completed:", documentId);
 
   } catch (err) {
     completed = true;
@@ -193,7 +188,6 @@ exports.processSummary = async (documentId) => {
 };
 
 exports.processExtraction = async (documentId) => {
-  console.log("🔎 Extraction started:", documentId);
 
   await db.update(documents)
     .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTING })
@@ -263,7 +257,6 @@ exports.processExtraction = async (documentId) => {
         )
       );
 
-    console.log("✅ Extraction completed:", documentId);
 
   } catch (err) {
     completed = true;
