@@ -19,7 +19,7 @@ app.use(
 
 app.use(express.json());
 
-// ================= ROUTES =================
+//Routes
 app.use("/auth", authRoutes);
 app.use("/documents", documentsRoutes);
 

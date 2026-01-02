@@ -1,19 +1,19 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import routes from "./Routes";
 import { useEffect, useState } from "react";
 import { JWT_TOKEN, setCookie, getCookie } from "../services/cookieService";
-import { breakPointObserver, ScreenSizes } from "./BreakpointObserver";
 import useUserStore from "../store/useUserStore";
 
 const ActiveRoutes = () => {
   const [loadContent, setLoadContent] = useState(true);
   const user = useUserStore((state) => state.user);
   const token = getCookie(JWT_TOKEN);
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (token) {
       if (!user) {
-        // Add user initialization logic if needed
+       navigate('/signin')
       }
       setCookie(JWT_TOKEN, token);
     }

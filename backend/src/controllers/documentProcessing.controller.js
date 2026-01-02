@@ -30,18 +30,16 @@ const SAMPLE_EXTRACTION = {
   note: "Sample data due to AI quota limit"
 };
 
-/* ================= TRANSLATION ================= */
-
 exports.processTranslation = async (documentId, fileUrl) => {
 
-  // 1️⃣ Mark as translating
+  // Mark as translating
   await db.update(documents)
     .set({ translationStatus: DOCUMENT_STATUSES.TRANSLATING })
     .where(eq(documents.id, documentId));
 
   let completed = false;
 
-  // 2️⃣ Watchdog timer
+  // Watchdog timer
   const timeoutId = setTimeout(async () => {
     if (completed) return;
 
@@ -58,13 +56,13 @@ exports.processTranslation = async (documentId, fileUrl) => {
   }, TRANSLATION_TIMEOUT_MS);
 
   try {
-    // 3️⃣ Actual translation work
+    // Actual translation work
     const extractedText = await extractTextFromPdf(fileUrl);
     const chunks = chunkText(extractedText);
     const translatedText = await translateTamilToEnglish(chunks);
 
     const translatedPdfBuffer = await generateTranslatedPdf(translatedText);
-    const translatedPdfUrl = await uploadPDF(
+    const translatedPdfUrl = await uploadPdf(
       translatedPdfBuffer,
       `translated_${documentId}.pdf`
     );
@@ -72,7 +70,7 @@ exports.processTranslation = async (documentId, fileUrl) => {
     completed = true;
     clearTimeout(timeoutId);
 
-    // 4️⃣ Mark success (ONLY if still translating)
+    // Mark success (ONLY if still translating)
     await db.update(documents)
       .set({
         translatedFileUrl: translatedPdfUrl,
@@ -90,7 +88,7 @@ exports.processTranslation = async (documentId, fileUrl) => {
     completed = true;
     clearTimeout(timeoutId);
 
-    console.error("❌ Translation failed:", err.message);
+    console.error(" Translation failed:", err.message);
 
     await db.update(documents)
       .set({ translationStatus: DOCUMENT_STATUSES.TRANSLATION_FAILED })
@@ -109,7 +107,7 @@ exports.processSummary = async (documentId) => {
   const timeoutId = setTimeout(async () => {
     if (completed) return;
 
-    console.error("⏰ Summary timeout:", documentId);
+    console.error(" Summary timeout:", documentId);
 
     await db.update(documents)
       .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARY_FAILED })
@@ -130,7 +128,7 @@ exports.processSummary = async (documentId) => {
       .limit(1);
 
     if (!docText?.content) {
-      console.warn("⚠️ No extracted text, saving sample summary");
+      console.warn("No extracted text, saving sample summary");
 
       completed = true;
       clearTimeout(timeoutId);
@@ -173,7 +171,7 @@ exports.processSummary = async (documentId) => {
     completed = true;
     clearTimeout(timeoutId);
 
-    console.error("❌ Summary failed:", err.message);
+    console.error("Summary failed:", err.message);
 
     await db.insert(documentAIOutputs).values({
       documentId,
@@ -198,7 +196,7 @@ exports.processExtraction = async (documentId) => {
   const timeoutId = setTimeout(async () => {
     if (completed) return;
 
-    console.error("⏰ Extraction timeout:", documentId);
+    console.error(" Extraction timeout:", documentId);
 
     await db.update(documents)
       .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTION_FAILED })
@@ -219,7 +217,7 @@ exports.processExtraction = async (documentId) => {
       .limit(1);
 
     if (!docText?.content) {
-      console.warn("⚠️ No extracted text, saving sample extraction");
+      console.warn(" No extracted text, saving sample extraction");
 
       completed = true;
       clearTimeout(timeoutId);
@@ -262,7 +260,7 @@ exports.processExtraction = async (documentId) => {
     completed = true;
     clearTimeout(timeoutId);
 
-    console.error("❌ Extraction failed:", err.message);
+    console.error(" Extraction failed:", err.message);
 
     await db.insert(documentTransactions).values({
       documentId,

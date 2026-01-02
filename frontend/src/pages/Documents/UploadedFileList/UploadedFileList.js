@@ -1,11 +1,10 @@
 import "./UploadedFileList.scss";
 import { toast } from "react-toastify";
-import { useEffect, useMemo, useState, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   fetchFiles,
   fileUploadSubject,
-  FetchFilesResponse,
   handleDeleteFileFromServer,
   editFileFromDb,
 } from "../../../services/file.service";
@@ -27,9 +26,6 @@ const UploadedFileList = () => {
   const [fileExtension, setFileExtension] = useState("");
 
   const navigate = useNavigate();
-  const location = useLocation();
-
-  /* ================= FETCH ================= */
 
   const fetchAndSetFiles = async (page, search) => {
     try {
@@ -41,13 +37,9 @@ const UploadedFileList = () => {
     }
   };
 
-  /* ================= INITIAL LOAD & PAGE CHANGE ================= */
-
   useEffect(() => {
     fetchAndSetFiles(currentPage, searchedText);
   }, []);
-
-  /* ================= DEBOUNCED SEARCH (NO URL) ================= */
 
   const debouncedSearch = useMemo(
     () =>
@@ -68,8 +60,6 @@ const UploadedFileList = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
-  /* ================= CLIENT FILTER ================= */
-
   useEffect(() => {
     if (!searchedText) {
       setFilteredFiles(files);
@@ -82,8 +72,6 @@ const UploadedFileList = () => {
     }
   }, [files, searchedText]);
 
-  /* ================= FILE UPLOAD REFRESH ================= */
-
   useEffect(() => {
     const sub = fileUploadSubject.subscribe((refresh) => {
       if (refresh) {
@@ -92,8 +80,6 @@ const UploadedFileList = () => {
     });
     return () => sub.unsubscribe();
   }, [currentPage, searchedText]);
-
-  /* ================= DELETE ================= */
 
   const handleDeleteFile = async (fileID) => {
     try {
@@ -105,8 +91,6 @@ const UploadedFileList = () => {
       console.error(err);
     }
   };
-
-  /* ================= EDIT ================= */
 
   const handleEditFile = (fileId) => {
     setEditMode(true);
@@ -136,8 +120,6 @@ const UploadedFileList = () => {
     setEditedName("");
     toast.success("File renamed successfully!", toastOptions);
   };
-
-  /* ================= PAGINATION ================= */
 
 const handlePreviousPage = () => {
   if (currentPage === 1) return;

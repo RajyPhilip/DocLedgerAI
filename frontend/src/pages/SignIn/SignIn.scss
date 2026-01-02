@@ -133,7 +133,9 @@
             display: none;
           }
         }
-
+.mob-hide {
+            display: none !important;
+          }
         .go-to-signup {
           margin-top: 0;
           width: 100%;
@@ -150,6 +152,7 @@
             display: block;
             margin-bottom: 8px;
           }
+          
 
           .signin-button-mobile {
             display: flex;

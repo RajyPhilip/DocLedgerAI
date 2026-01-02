@@ -1,5 +1,3 @@
-import { ToastPosition } from "react-toastify";
-
 export const toastOptions = {
   position: "top-right",
   autoClose: 3000,

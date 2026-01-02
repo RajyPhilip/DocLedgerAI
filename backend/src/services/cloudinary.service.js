@@ -37,7 +37,7 @@ exports.deletePdf = async (fileUrl) => {
     const uploadIndex = fileUrl.indexOf("/upload/");
     let publicPath = fileUrl.substring(uploadIndex + 8);
 
-    // Remove version if exists (v12345/)
+    // Remove version if exists
     if (publicPath.startsWith("v")) {
       publicPath = publicPath.substring(publicPath.indexOf("/") + 1);
     }
@@ -47,13 +47,13 @@ exports.deletePdf = async (fileUrl) => {
 
 
     await cloudinary.uploader.destroy(publicId, {
-      resource_type: "raw", // ✅ MUST MATCH upload
+      resource_type: "raw",
       invalidate: true,
     });
 
-    console.log("✅ Cloudinary delete successful");
+    console.log("Cloudinary delete successful");
   } catch (err) {
-    console.error("❌ Cloudinary delete failed:", err.message);
+    console.error("Cloudinary delete failed:", err.message);
   }
 };
 

@@ -2,15 +2,11 @@ import "./SignIn.scss";
 import { useEffect, useState, MouseEvent } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import {
-  ScreenSizes,
-  breakPointObserver,
-} from "../../utils/BreakpointObserver";
 import { toastOptions } from "../../utils/toast";
 import FormInput from "../../components/FormInput/FormInput";
 import ApiService from "../../services/apiService";
 import useUserStore from "../../store/useUserStore";
-import { getCookie, JWT_TOKEN, setCookie } from "../../services/cookieService";
+import { JWT_TOKEN, setCookie } from "../../services/cookieService";
 import URL_CONSTANTS from "../../urls/Urls";
 
 const SignIn = () => {
@@ -20,16 +16,13 @@ const SignIn = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [breakpoint, setBreakpoint] = useState("");
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    breakPointObserver(setBreakpoint);
-  }, [breakpoint]);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+    // doble check if signin btn might get active 
     if (email.length === 0 || password.length === 0) {
       toast.error("Please enter valid email or password", toastOptions);
       return;
@@ -71,10 +64,8 @@ const SignIn = () => {
             className="flex-column align-items-start"
             style={{ width: "100%" }}
           >
-            {breakpoint !== ScreenSizes.MOBILE && (
           
-                <div  className="logo-footer-mobile"><img style={{marginLeft:'-32px'}} height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></div>
-            )}
+            <div  className=" mob-hide"><img style={{marginLeft:'-32px'}} height={140} width={190} src="https://i.ibb.co/pBSVCDVJ/pffgg-reader-logo-removebg-preview.png" alt="logo" border="0"/></div>
 
             <span className="signin-description flex-column gap-4">
               <p className="welcome-heading xetgo-font-h2">Welcome back!</p>

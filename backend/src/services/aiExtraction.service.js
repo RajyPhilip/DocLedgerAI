@@ -62,7 +62,7 @@ ${chunks[i]}
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim();
 
-      // 🔒 Sanitize JSON
+      // Sanitize JSON
       const jsonStart = text.indexOf("{");
       const jsonEnd = text.lastIndexOf("}");
       if (jsonStart === -1 || jsonEnd === -1) {

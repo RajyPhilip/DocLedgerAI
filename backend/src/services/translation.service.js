@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 exports.translateTamilToEnglish = async (textChunks) => {
-  // UPDATED: Use the current 2.5 or 3 version (1.5 is now retired)
+  // UPDATED: Use the current 2.5 or 3
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash", 
   });

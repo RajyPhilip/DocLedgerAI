@@ -51,7 +51,7 @@ ${chunks[i]}
     } catch (err) {
       console.error("❌ Gemini summarization error:", err.message);
 
-      // 🔥 Only retry / fallback on quota
+      // Only retry / fallback on quota
       if (
         err.message.includes("429") ||
         err.message.includes("Quota") ||
@@ -64,7 +64,7 @@ ${chunks[i]}
         continue;
       }
 
-      // ❌ real error — propagate
+      // real error — propagate
       throw err;
     }
   }

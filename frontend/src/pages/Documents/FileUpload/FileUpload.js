@@ -22,27 +22,25 @@ function FileUpload() {
   const [editingFileName, setEditingFileName] = useState("");
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
 
- const handleFileChange = (event) => {
-  if (!event.target.files || event.target.files.length === 0) return;
+  const handleFileChange = (event) => {
+    if (!event.target.files || event.target.files.length === 0) return;
 
-  const files = Array.from(event.target.files);
+    const files = Array.from(event.target.files);
 
-  // Allow only PDFs
-  const nonPdfFiles = files.filter(
-    (file) => file.type !== "application/pdf"
-  );
+    // Allow only PDFs
+    const nonPdfFiles = files.filter(
+      (file) => file.type !== "application/pdf"
+    );
 
-  if (nonPdfFiles.length > 0) {
-    toast.error("Please select PDF files only", toastOptions);
-    event.target.value = ""; // reset file input
-    return;
-  }
+    if (nonPdfFiles.length > 0) {
+      toast.error("Please select PDF files only", toastOptions);
+      event.target.value = ""; // reset file input
+      return;
+    }
 
-  // All files are valid PDFs
-  setSelectedFiles(files);
-  setDisplayNames(files.map((file) => file.name));
-};
-
+    setSelectedFiles(files);
+    setDisplayNames(files.map((file) => file.name));
+  };
 
   const handleOpenEditDialog = (fileIndex) => {
     setEditingFileIndex(fileIndex);

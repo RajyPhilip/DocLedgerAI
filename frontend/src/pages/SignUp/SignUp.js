@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import "./SignUp.scss";
 import { useNavigate } from "react-router-dom";
-import { breakPointObserver} from "../../utils/BreakpointObserver";
 import FormInput from "../../components/FormInput/FormInput";
 import ApiService from "../../services/apiService";
 import useUserStore from "../../store/useUserStore";
@@ -13,7 +12,6 @@ const Signup = () => {
   const navigate = useNavigate();
   const setUser = useUserStore((state) => state.setUser);
 
-  const [breakpoint, setBreakpoint] = useState("");
   const [validForm, setValidForm] = useState(false);
   const [mobileTouched, setMobileTouched] = useState(false);
   const [mobileError, setMobileError] = useState("");
@@ -24,10 +22,6 @@ const Signup = () => {
     name: "",
     mobileNumber: "",
   });
-
-  useEffect(() => {
-    breakPointObserver(setBreakpoint);
-  }, []);
 
 useEffect(() => {
   setValidForm(

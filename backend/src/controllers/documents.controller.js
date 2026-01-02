@@ -151,6 +151,7 @@ exports.updateDocumentName = async (req, res) => {
     return res.json({
       status: "success",
       message: "Document name updated successfully",
+      updatedDoc:updatedDoc
     });
   } catch (err) {
     console.error("Update document failed:", err);
@@ -185,7 +186,7 @@ exports.deleteDocument = async (req, res) => {
       });
     }
 
-    // 2️⃣ Delete from Cloudinary
+    // Delete from Cloudinary
     try {
       await deletePdf(doc.fileUrl);
       if (doc.translatedFileUrl) {
@@ -195,7 +196,7 @@ exports.deleteDocument = async (req, res) => {
       console.error("⚠️ Cloudinary delete failed:", err.message);
     }
 
-    // 3️⃣ Delete related DB rows (ORDER MATTERS)
+    // Delete related DB rows (ORDER MATTERS)
     await db.delete(documentTexts)
       .where(eq(documentTexts.documentId, documentId));
 
@@ -205,7 +206,7 @@ exports.deleteDocument = async (req, res) => {
     await db.delete(documentTransactions)
       .where(eq(documentTransactions.documentId, documentId));
 
-    // 4️⃣ Delete document itself
+    //  Delete document itself
     await db.delete(documents)
       .where(eq(documents.id, documentId));
 

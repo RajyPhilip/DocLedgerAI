@@ -9,18 +9,13 @@ import { DOCUMENT_STATUSES, SAMPLE_EXTRACTION, SAMPLE_SUMMARY } from "../../cons
 
 const DocumentDetail = () => {
  
-    const { id } = useParams();
-
+  const { id } = useParams();
   const apiClient = ApiService().client;
 
   const [documentDetail, setDocumentDetail] = useState(null);
   const [loading, setLoading] = useState(true);
-  let summaryText =
-    documentDetail?.summary ||
-    SAMPLE_SUMMARY
-
-    let extractedData = documentDetail?.extractedJson || SAMPLE_EXTRACTION
-  /* ================= FETCH DOCUMENT ================= */
+  let summaryText =documentDetail?.summary ||SAMPLE_SUMMARY
+  let extractedData = documentDetail?.extractedJson || SAMPLE_EXTRACTION
 
   const fetchDocumentDetail = async (documentId) => {
     try {
@@ -43,7 +38,6 @@ const DocumentDetail = () => {
     if (id) fetchDocumentDetail(id);
   }, [id]);
 
-  /* ================= HELPERS ================= */
 
  const openInNewTab = (url) => {
   if (!url) return toast.error("File not available");
@@ -61,27 +55,24 @@ const DocumentDetail = () => {
   document.body.removeChild(a);
 };
 
-  /* ================= ACTIONS ================= */
+const handleTranslatePdf = async () => {
+  try {
+      setDocumentDetail((prev) => {
+    if (!prev) return prev;
 
-  const handleTranslatePdf = async () => {
-    try {
-       setDocumentDetail((prev) => {
-      if (!prev) return prev;
-
-      return {
-        ...prev,
-        translationStatus: DOCUMENT_STATUSES.TRANSLATING,
-      };
-    });
-      const result = await apiClient.post(URL_CONSTANTS.DOCUMENTS.TRANSLATE(id));
-      // recive the url from backend and update document details addd translatedurl of the url that we will get from backend 
-      toast.success("Translation started");
-     
-    } catch(err) {
-      console.error('Error Translating PDF',err)
-      toast.error("Failed to translate PDF");
-    }
-  };
+    return {
+      ...prev,
+      translationStatus: DOCUMENT_STATUSES.TRANSLATING,
+    };
+  });
+    await apiClient.post(URL_CONSTANTS.DOCUMENTS.TRANSLATE(id));
+    toast.success("Translation started");
+    
+  } catch(err) {
+    console.error('Error Translating PDF',err)
+    toast.error("Failed to translate PDF");
+  }
+};
 
   const handleGenerateSummary = async () => {
     try {
@@ -206,7 +197,6 @@ const DocumentDetail = () => {
              
             </div>
           </div>
-          {/* <h1>{documentDetail?.translationStatus===DOCUMENT_STATUSES.IDLE} {documentDetail?.translationStatus}</h1> */}
 
           {documentDetail?.translationStatus===DOCUMENT_STATUSES.TRANSLATED ?
            (
@@ -297,10 +287,6 @@ const DocumentDetail = () => {
                   </div>
                 </div>
               </div>
-
-              
-              
-             
             </div>
           </div> 
          ):
