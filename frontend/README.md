@@ -1,82 +1,70 @@
-# 📄 DocLedger - Document Processing System
+# Getting Started with Create React App
 
-DocLedger is a comprehensive document processing system that handles PDF uploads, text extraction, translation, summarization, and data extraction using AI.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## 🚀 Quick Start
+## Available Scripts
 
-### 1. Fork and Clone
-```bash
-# Fork the repository on GitHub, then clone:
-git clone https://github.com/YOUR_USERNAME/docledger.git
-cd docledger
-2. Backend Setup
-bash
-cd backend
-npm install
-Create .env file:
+In the project directory, you can run:
 
-env
-PORT=5000
-DATABASE_URL=postgresql://username:password@localhost:5432/docledger_dev
-CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-GEMINI_API_KEY=your_gemini_api_key
-Start backend:
+### `npm start`
 
-bash
-npm run dev
-3. Frontend Setup
-bash
-cd ../frontend
-npm install
-Start frontend:
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-bash
-npm start
-✅ Access Application
-Frontend: http://localhost:3000
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-Backend API: http://localhost:5000
+### `npm test`
 
-text
-i guess the backendsetp nd thee steps should also be in the code same goes for frontend setup do not give diffrent bashes just add it in file
-markdown
-# 📄 DocLedger - Document Processing System
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-DocLedger is a comprehensive document processing system that handles PDF uploads, text extraction, translation, summarization, and data extraction using AI.
+### `npm run build`
 
-## 🚀 Quick Start
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### 1. Clone and Setup Backend
-```bash
-git clone https://github.com/YOUR_USERNAME/docledger.git
-cd docledger/backend
-npm install
-Create .env file in /backend directory:
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-env
-PORT=5000
-DATABASE_URL=postgresql://username:password@localhost:5432/docledger_dev
-CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-GEMINI_API_KEY=your_gemini_api_key
-Start backend server:
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-bash
-npm run dev
-2. Setup Frontend
-bash
-cd ../frontend
-npm install
-npm start
-✅ Access Application
-Frontend: http://localhost:3000
+### `npm run eject`
 
-Backend API: http://localhost:5000
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-📝 Notes
-Make sure PostgreSQL is running on your system
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Get API keys from Cloudinary and Google Gemini AI
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
