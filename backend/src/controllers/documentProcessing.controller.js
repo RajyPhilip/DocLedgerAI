@@ -217,7 +217,7 @@ exports.processExtraction = async (documentId) => {
       .limit(1);
 
     if (!docText?.content) {
-      console.warn(" No extracted text, saving sample extraction");
+      console.warn("No extracted text, saving sample extraction");
 
       completed = true;
       clearTimeout(timeoutId);
@@ -260,7 +260,7 @@ exports.processExtraction = async (documentId) => {
     completed = true;
     clearTimeout(timeoutId);
 
-    console.error(" Extraction failed:", err.message);
+    console.error("Extraction failed:", err.message);
 
     await db.insert(documentTransactions).values({
       documentId,

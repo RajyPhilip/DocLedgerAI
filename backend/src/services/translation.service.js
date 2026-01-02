@@ -26,7 +26,7 @@ exports.translateTamilToEnglish = async (textChunks) => {
       translatedText += "\n\n" + result.response.text();
       retryDelay = 20000; // Reset delay on success
 
-      // Wait 5 seconds between successful chunks (12 RPM safety)
+      // Wait 5 seconds between successful chunks
       if (i < textChunks.length - 1) {
         await sleep(5000); 
       }
