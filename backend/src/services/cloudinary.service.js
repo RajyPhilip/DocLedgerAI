@@ -6,7 +6,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-exports.uploadPDF = (buffer, fileName) => {
+exports.uploadPdf = (buffer, fileName) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -28,7 +28,36 @@ exports.uploadPDF = (buffer, fileName) => {
   });
 };
 
+exports.deletePdf = async (fileUrl) => {
+  if (!fileUrl) return;
 
+  try {
+    console.log("🗑️ Deleting Cloudinary file:", fileUrl);
+
+    // Extract path AFTER /upload/
+    const uploadIndex = fileUrl.indexOf("/upload/");
+    let publicPath = fileUrl.substring(uploadIndex + 8);
+
+    // Remove version if exists (v12345/)
+    if (publicPath.startsWith("v")) {
+      publicPath = publicPath.substring(publicPath.indexOf("/") + 1);
+    }
+
+    // Remove extension (.pdf)
+    const publicId = publicPath.replace(".pdf", "");
+
+    console.log("🧹 Public ID:", publicId);
+
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: "raw", // ✅ MUST MATCH upload
+      invalidate: true,
+    });
+
+    console.log("✅ Cloudinary delete successful");
+  } catch (err) {
+    console.error("❌ Cloudinary delete failed:", err.message);
+  }
+};
 
 
 

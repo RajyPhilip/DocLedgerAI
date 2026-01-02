@@ -1,6 +1,6 @@
 const { documents } = require("../db/schema/documents.schema");
 const {  eq, ilike, and, desc, sql } = require("drizzle-orm");
-const { uploadPDF } = require("../services/cloudinary.service");
+const { uploadPdf, deletePdf } = require("../services/cloudinary.service");
 // const { processDocument } = require("../documentProcessing.controller");
 const { processTranslation, processSummary, processExtraction } = require("./documentProcessing.controller");
 const { documentAIOutputs } = require("../db/schema/document_ai_outputs.schema");
@@ -8,6 +8,7 @@ const { documentTransactions } = require("../db/schema/document_transactions.sch
 
 const db = require("../db");
 const { extractTextFromPdf } = require("../services/pdfExtract.service");
+const { documentTexts } = require("../db/schema/document_texts.schema");
 
 const PAGE_SIZE = 10;
 
@@ -17,7 +18,7 @@ exports.uploadDocument = async (req, res) => {
     const file = req.file;
 
     const fileName = req.body.displayName || file.originalname;
-    const fileUrl = await uploadPDF(file.buffer, fileName);
+    const fileUrl = await uploadPdf(file.buffer, fileName);
 
     const [doc] = await db.insert(documents).values({
       userId,
@@ -52,7 +53,6 @@ exports.uploadDocument = async (req, res) => {
     res.status(500).json({ message: "Upload failed" });
   }
 };
-
 
 exports.getDocuments = async (req, res) => {
   try {
@@ -117,8 +117,6 @@ exports.updateDocumentName = async (req, res) => {
     const documentId = Number(req.params.id);
     const { fileName } = req.body;
 
-    /* ================= VALIDATIONS ================= */
-
     if (!documentId || isNaN(documentId)) {
       return res.status(400).json({ message: "Invalid document id" });
     }
@@ -168,28 +166,61 @@ exports.updateDocumentName = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const docId = Number(req.params.id);
+    const documentId = Number(req.params.id);
 
-    const result = await db
-      .delete(documents)
+    if (!documentId || isNaN(documentId)) {
+      return res.status(400).json({ message: "Invalid document id" });
+    }
+
+    const [doc] = await db
+      .select()
+      .from(documents)
       .where(
         and(
-          eq(documents.id, docId),
+          eq(documents.id, documentId),
           eq(documents.userId, userId)
         )
-      )
-      .returning();
+      );
 
-    if (result.length === 0) {
+    if (!doc) {
       return res.status(404).json({
         message: "Document not found or access denied",
       });
     }
 
-    res.json({ status: "success" });
+    // 2️⃣ Delete from Cloudinary
+    console.log('DOCUMENT FOUN DEL FROM CLOUD')
+    try {
+      await deletePdf(doc.fileUrl);
+      if (doc.translatedFileUrl) {
+        await deletePdf(doc.translatedFileUrl);
+      }
+    } catch (err) {
+      console.error("⚠️ Cloudinary delete failed:", err.message);
+    }
+
+    // 3️⃣ Delete related DB rows (ORDER MATTERS)
+    await db.delete(documentTexts)
+      .where(eq(documentTexts.documentId, documentId));
+
+    await db.delete(documentAIOutputs)
+      .where(eq(documentAIOutputs.documentId, documentId));
+
+    await db.delete(documentTransactions)
+      .where(eq(documentTransactions.documentId, documentId));
+
+    // 4️⃣ Delete document itself
+    await db.delete(documents)
+      .where(eq(documents.id, documentId));
+
+    return res.json({
+      status: "success",
+      message: "Document deleted successfully",
+    });
+
   } catch (err) {
     console.error("Delete document failed:", err);
-    res.status(500).json({ message: "Delete failed" });
+    return res.status(500).json({ message: "Delete failed" });
   }
 };
 
@@ -210,12 +241,12 @@ exports.getDocumentDetail = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-      const [summary] = await db
-        .select()
-        .from(documentAIOutputs)
-        .where(eq(documentAIOutputs.documentId, documentId))
-        .orderBy(desc(documentAIOutputs.createdAt))
-        .limit(1);
+    const [summary] = await db
+      .select()
+      .from(documentAIOutputs)
+      .where(eq(documentAIOutputs.documentId, documentId))
+      .orderBy(desc(documentAIOutputs.createdAt))
+      .limit(1);
 
     const [extracted] = await db
       .select()
@@ -227,13 +258,17 @@ exports.getDocumentDetail = async (req, res) => {
     return res.json({
       status: "success",
       data: {
-        ...doc,
-
+        id: doc.id,
+        originalFilename: doc.originalFilename,
+        fileUrl: doc.fileUrl,
+        translatedFileUrl: doc.translatedFileUrl,
+        createdAt: doc.createdAt,
+        translationStatus: doc.translationStatus || DOCUMENT_STATUSES.IDLE,
+        summaryStatus: doc.summaryStatus || DOCUMENT_STATUSES.IDLE,
+        extractionStatus: doc.extractionStatus || DOCUMENT_STATUSES.IDLE,
         summary: summary?.summaryText || null,
-
-        extractedJson: extracted?.extractedJson ?? null,
-        extractedSource: extracted?.source ?? null,
         summaryIsSample: summary?.isSample ?? false,
+        extractedJson: extracted?.extractedJson ?? null,
         extractedIsSample: extracted?.isSample ?? false,
       },
     });
@@ -287,14 +322,10 @@ exports.generateSummary = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    const source = doc.translatedFileUrl ? "translated" : "original";
-    const fileUrl = doc.translatedFileUrl || doc.fileUrl;
-
     process.nextTick(() => {
-      processSummary(documentId, fileUrl, source)
-        .catch(err =>
-          console.error(`Summary failed for document ${documentId}`, err)
-        );
+      processSummary(documentId).catch(err =>
+        console.error(`Summary failed for document ${documentId}`, err)
+      );
     });
 
     res.json({
@@ -319,14 +350,10 @@ exports.extractData = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    const source = doc.translatedFileUrl ? "translated" : "original";
-    const fileUrl = doc.translatedFileUrl || doc.fileUrl;
-
     process.nextTick(() => {
-      processExtraction(documentId, fileUrl, source)
-        .catch(err =>
-          console.error(`Extraction failed for document ${documentId}`, err)
-        );
+      processExtraction(documentId).catch(err =>
+        console.error(`Extraction failed for document ${documentId}`, err)
+      );
     });
 
     res.json({

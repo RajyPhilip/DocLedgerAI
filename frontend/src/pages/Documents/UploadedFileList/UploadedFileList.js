@@ -11,7 +11,6 @@ import {
 } from "../../../services/file.service";
 import { toastOptions } from "../../../utils/toast";
 import { debounce } from "lodash";
-import { generateFileListURL } from "./UrlNavigation";
 
 const UploadedFileList = () => {
  
@@ -102,6 +101,7 @@ const UploadedFileList = () => {
       toast.success("File deleted successfully!", toastOptions);
       fetchAndSetFiles(currentPage, searchedText);
     } catch (err) {
+      toast.error('File Deletion Failed!',toastOptions)
       console.error(err);
     }
   };
@@ -235,7 +235,7 @@ const handleNextPage = () => {
                 <i
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteFile(file.url, file.id)
+                    handleDeleteFile(file.id);
                   }}
                   className="fa-solid fa-trash"
                   style={{ color: "lightgrey" }}

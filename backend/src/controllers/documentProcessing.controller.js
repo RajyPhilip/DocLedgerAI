@@ -7,10 +7,11 @@ const { documentAIOutputs } = require("../db/schema/document_ai_outputs.schema")
 const { documentTransactions } = require("../db/schema/document_transactions.schema");
 const { documents } = require("../db/schema/documents.schema");
 const { chunkText } = require("../utils/textChunker");
-const { uploadPDF } = require("../services/cloudinary.service");
+const { uploadPdf } = require("../services/cloudinary.service");
 const { eq, and, desc } = require("drizzle-orm");
 const db = require("../db");
 const { documentTexts } = require("../db/schema/document_texts.schema");
+const { DOCUMENT_STATUSES, TRANSLATION_TIMEOUT_MS } = require("../constants/documents.data");
 
 const SAMPLE_SUMMARY = `
 This document appears to be a legal real estate related agreement.
@@ -32,66 +33,129 @@ const SAMPLE_EXTRACTION = {
 /* ================= TRANSLATION ================= */
 
 exports.processTranslation = async (documentId, fileUrl) => {
-  console.log("🚀 Translation started for doc:", documentId);
+  console.log("🚀 Translation started:", documentId);
 
-  // 1️⃣ Extract text (NO AI)
-  const extractedText = await extractTextFromPdf(fileUrl);
-
-  // 2️⃣ Chunk text
-  const chunks = chunkText(extractedText);
-
-  // 3️⃣ Translate chunks (LOW TOKEN)
-  const translatedText = await translateTamilToEnglish(chunks);
-
-  // 4️⃣ Generate PDF
-  const translatedPdfBuffer = await generateTranslatedPdf(translatedText);
-
-  // 5️⃣ Upload PDF
-  const translatedPdfUrl = await uploadPDF(
-    translatedPdfBuffer,
-    `translated_${documentId}.pdf`
-  );
-
-  // 6️⃣ Save URL
-  await db
-    .update(documents)
-    .set({
-      translatedFileUrl: translatedPdfUrl,
-      status: "TRANSLATED",
-    })
+  // 1️⃣ Mark as translating
+  await db.update(documents)
+    .set({ translationStatus: DOCUMENT_STATUSES.TRANSLATING })
     .where(eq(documents.id, documentId));
 
-  console.log("✅ Translation completed:", translatedPdfUrl);
+  let completed = false;
+
+  // 2️⃣ Watchdog timer
+  const timeoutId = setTimeout(async () => {
+    if (completed) return;
+
+    console.error("⏰ Translation timeout:", documentId);
+
+    await db.update(documents)
+      .set({ translationStatus: DOCUMENT_STATUSES.TRANSLATION_FAILED })
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.translationStatus, DOCUMENT_STATUSES.TRANSLATING)
+        )
+      );
+  }, TRANSLATION_TIMEOUT_MS);
+
+  try {
+    // 3️⃣ Actual translation work
+    const extractedText = await extractTextFromPdf(fileUrl);
+    const chunks = chunkText(extractedText);
+    const translatedText = await translateTamilToEnglish(chunks);
+
+    const translatedPdfBuffer = await generateTranslatedPdf(translatedText);
+    const translatedPdfUrl = await uploadPDF(
+      translatedPdfBuffer,
+      `translated_${documentId}.pdf`
+    );
+
+    completed = true;
+    clearTimeout(timeoutId);
+
+    // 4️⃣ Mark success (ONLY if still translating)
+    await db.update(documents)
+      .set({
+        translatedFileUrl: translatedPdfUrl,
+        translationStatus: DOCUMENT_STATUSES.TRANSLATED,
+        status: "TRANSLATED",
+      })
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.translationStatus, DOCUMENT_STATUSES.TRANSLATING)
+        )
+      );
+
+    console.log("✅ Translation completed:", documentId);
+
+  } catch (err) {
+    completed = true;
+    clearTimeout(timeoutId);
+
+    console.error("❌ Translation failed:", err.message);
+
+    await db.update(documents)
+      .set({ translationStatus: DOCUMENT_STATUSES.TRANSLATION_FAILED })
+      .where(eq(documents.id, documentId));
+  }
 };
 
 exports.processSummary = async (documentId) => {
-  const [docText] = await db
-    .select()
-    .from(documentTexts)
-    .where(
-      and(
-        eq(documentTexts.documentId, documentId),
-        eq(documentTexts.type, "original")
-      )
-    )
-    .orderBy(desc(documentTexts.createdAt))
-    .limit(1);
+  console.log("📝 Summary started:", documentId);
 
-  // ✅ DO NOT THROW — FALL BACK
-  if (!docText?.content) {
-    console.error("⚠️ Extracted text not found, saving sample summary");
+  await db.update(documents)
+    .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARIZING })
+    .where(eq(documents.id, documentId));
 
-    await db.insert(documentAIOutputs).values({
-      documentId,
-      summaryText: SAMPLE_SUMMARY,
-      isSample: true,
-    });
+  let completed = false;
 
-    return;
-  }
+  const timeoutId = setTimeout(async () => {
+    if (completed) return;
+
+    console.error("⏰ Summary timeout:", documentId);
+
+    await db.update(documents)
+      .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARY_FAILED })
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.summaryStatus, DOCUMENT_STATUSES.SUMMARIZING)
+        )
+      );
+  }, TRANSLATION_TIMEOUT_MS);
 
   try {
+    const [docText] = await db
+      .select()
+      .from(documentTexts)
+      .where(eq(documentTexts.documentId, documentId))
+      .orderBy(desc(documentTexts.createdAt))
+      .limit(1);
+
+    if (!docText?.content) {
+      console.warn("⚠️ No extracted text, saving sample summary");
+
+      completed = true;
+      clearTimeout(timeoutId);
+
+      await db.insert(documentAIOutputs).values({
+        documentId,
+        summaryText: SAMPLE_SUMMARY,
+        isSample: true,
+      });
+
+      await db.update(documents)
+        .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARY_SAMPLE })
+        .where(eq(documents.id, documentId));
+
+      return;
+    }
+
     const summary = await generateSummary(docText.content);
+
+    completed = true;
+    clearTimeout(timeoutId);
 
     await db.insert(documentAIOutputs).values({
       documentId,
@@ -99,44 +163,90 @@ exports.processSummary = async (documentId) => {
       isSample: false,
     });
 
+    await db.update(documents)
+      .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARY_COMPLETED })
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.summaryStatus, DOCUMENT_STATUSES.SUMMARIZING)
+        )
+      );
+
+    console.log("✅ Summary completed:", documentId);
+
   } catch (err) {
-    console.error("❌ Gemini summary failed, saving sample");
+    completed = true;
+    clearTimeout(timeoutId);
+
+    console.error("❌ Summary failed:", err.message);
 
     await db.insert(documentAIOutputs).values({
       documentId,
       summaryText: SAMPLE_SUMMARY,
       isSample: true,
     });
+
+    await db.update(documents)
+      .set({ summaryStatus: DOCUMENT_STATUSES.SUMMARY_SAMPLE })
+      .where(eq(documents.id, documentId));
   }
 };
 
 exports.processExtraction = async (documentId) => {
-  const [docText] = await db
-    .select()
-    .from(documentTexts)
-    .where(
-      and(
-        eq(documentTexts.documentId, documentId),
-        eq(documentTexts.type, "original")
-      )
-    )
-    .orderBy(desc(documentTexts.createdAt))
-    .limit(1);
+  console.log("🔎 Extraction started:", documentId);
 
-  if (!docText?.content) {
-    console.error("⚠️ Extracted text not found, saving sample extraction");
+  await db.update(documents)
+    .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTING })
+    .where(eq(documents.id, documentId));
 
-    await db.insert(documentTransactions).values({
-      documentId,
-      extractedJson: SAMPLE_EXTRACTION,
-      isSample: true,
-    });
+  let completed = false;
 
-    return;
-  }
+  const timeoutId = setTimeout(async () => {
+    if (completed) return;
+
+    console.error("⏰ Extraction timeout:", documentId);
+
+    await db.update(documents)
+      .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTION_FAILED })
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.extractionStatus, DOCUMENT_STATUSES.EXTRACTING)
+        )
+      );
+  }, TRANSLATION_TIMEOUT_MS);
 
   try {
+    const [docText] = await db
+      .select()
+      .from(documentTexts)
+      .where(eq(documentTexts.documentId, documentId))
+      .orderBy(desc(documentTexts.createdAt))
+      .limit(1);
+
+    if (!docText?.content) {
+      console.warn("⚠️ No extracted text, saving sample extraction");
+
+      completed = true;
+      clearTimeout(timeoutId);
+
+      await db.insert(documentTransactions).values({
+        documentId,
+        extractedJson: SAMPLE_EXTRACTION,
+        isSample: true,
+      });
+
+      await db.update(documents)
+        .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTION_SAMPLE })
+        .where(eq(documents.id, documentId));
+
+      return;
+    }
+
     const extractedJson = await extractStructuredData(docText.content);
+
+    completed = true;
+    clearTimeout(timeoutId);
 
     await db.insert(documentTransactions).values({
       documentId,
@@ -144,13 +254,31 @@ exports.processExtraction = async (documentId) => {
       isSample: false,
     });
 
+    await db.update(documents)
+      .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTION_COMPLETED })
+      .where(
+        and(
+          eq(documents.id, documentId),
+          eq(documents.extractionStatus, DOCUMENT_STATUSES.EXTRACTING)
+        )
+      );
+
+    console.log("✅ Extraction completed:", documentId);
+
   } catch (err) {
-    console.error("❌ Gemini extraction failed, saving sample");
+    completed = true;
+    clearTimeout(timeoutId);
+
+    console.error("❌ Extraction failed:", err.message);
 
     await db.insert(documentTransactions).values({
       documentId,
       extractedJson: SAMPLE_EXTRACTION,
       isSample: true,
     });
+
+    await db.update(documents)
+      .set({ extractionStatus: DOCUMENT_STATUSES.EXTRACTION_SAMPLE })
+      .where(eq(documents.id, documentId));
   }
 };

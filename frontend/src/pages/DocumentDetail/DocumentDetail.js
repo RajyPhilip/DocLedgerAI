@@ -4,8 +4,8 @@ import "./DocumentDetail.scss";
 import ApiService from "../../services/apiService";
 import URL_CONSTANTS from "../../urls/Urls";
 import Header from "../../components/Header/Header";
-import { SAMPLE_DOCUMENT_DETAIL } from "./DucomentDetail.data";
 import { toast } from "react-toastify";
+import { DOCUMENT_STATUSES, SAMPLE_EXTRACTION, SAMPLE_SUMMARY } from "../../constants/DocumentStatuses.data";
 
 const DocumentDetail = () => {
  
@@ -15,11 +15,11 @@ const DocumentDetail = () => {
 
   const [documentDetail, setDocumentDetail] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-  const [extractingData, setExtractingData] = useState(false);
-  const [translatingPdf, setTranslatingPdf] = useState(false);
-  const [ifTranslatedPdfAvailable, setIfTranslatedPdfAvailable] = useState(false);
+  let summaryText =
+    documentDetail?.summary ||
+    SAMPLE_SUMMARY
 
+    let extractedData = documentDetail?.extractedJson || SAMPLE_EXTRACTION
   /* ================= FETCH DOCUMENT ================= */
 
   const fetchDocumentDetail = async (documentId) => {
@@ -29,6 +29,8 @@ const DocumentDetail = () => {
         URL_CONSTANTS.DOCUMENTS.GET_DETAIL(documentId)
       );
       setDocumentDetail(response.data?.data || null);
+       summaryText =documentDetail?.summary ||SAMPLE_SUMMARY
+       extractedData=documentDetail?.extractedJson || SAMPLE_EXTRACTION
     } catch (err) {
       console.error(err);
       toast.error("Failed to load document details");
@@ -40,10 +42,6 @@ const DocumentDetail = () => {
   useEffect(() => {
     if (id) fetchDocumentDetail(id);
   }, [id]);
-
-  useEffect(() => {
-    setIfTranslatedPdfAvailable(!!documentDetail?.translatedFileUrl);
-  }, [documentDetail]);
 
   /* ================= HELPERS ================= */
 
@@ -68,42 +66,57 @@ const DocumentDetail = () => {
   const handleTranslatePdf = async () => {
     try {
       console.log('TRanslated pdf ')
-      setTranslatingPdf(true);
+       setDocumentDetail((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        translationStatus: DOCUMENT_STATUSES.TRANSLATING,
+      };
+    });
       const result = await apiClient.post(URL_CONSTANTS.DOCUMENTS.TRANSLATE(id));
       // recive the url from backend and update document details addd translatedurl of the url that we will get from backend 
       toast.success("Translation started");
-      // setTimeout(() => fetchDocumentDetail(id), 3000);
+     
     } catch(err) {
       console.error('Error Translating PDF',err)
       toast.error("Failed to translate PDF");
-    } finally {
-      setTranslatingPdf(false);
     }
   };
 
   const handleGenerateSummary = async () => {
     try {
-      setGeneratingSummary(true);
+       setDocumentDetail((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        summaryStatus: DOCUMENT_STATUSES.SUMMARIZING,
+      };
+    });
       await apiClient.post(URL_CONSTANTS.DOCUMENTS.GENERATE_SUMMARY(id));
       toast.success("Summary generation started");
       setTimeout(() => fetchDocumentDetail(id), 3000);
     } catch {
       toast.error("Failed to generate summary");
-    } finally {
-      setGeneratingSummary(false);
     }
   };
 
   const handleExtractData = async () => {
     try {
-      setExtractingData(true);
+       setDocumentDetail((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        extractionStatus: DOCUMENT_STATUSES.EXTRACTING,
+      };
+    });
       await apiClient.post(URL_CONSTANTS.DOCUMENTS.EXTRACT_DATA(id));
       toast.success("Extraction started");
       setTimeout(() => fetchDocumentDetail(id), 3000);
     } catch {
       toast.error("Failed to extract data");
-    } finally {
-      setExtractingData(false);
     }
   };
 
@@ -141,14 +154,7 @@ const DocumentDetail = () => {
                 <span className="bold">Uploaded:</span>
                 <span >{new Date(documentDetail?.createdAt || '').toLocaleString()}</span>
               </div>
-              <div className="flex-row gap-8 align-items-center">
-                <span className="bold">Status:</span>
-                <span  style={{
-                  color: '#f59e0b'
-                }}>
-                   {documentDetail?.status}
-                </span>
-              </div>
+             
             </div>
           </div>
         </div>
@@ -201,9 +207,11 @@ const DocumentDetail = () => {
              
             </div>
           </div>
+          {/* <h1>{documentDetail?.translationStatus===DOCUMENT_STATUSES.IDLE} {documentDetail?.translationStatus}</h1> */}
 
-          {ifTranslatedPdfAvailable ?
-            <div className="pdf-container flex-1">
+          {documentDetail?.translationStatus===DOCUMENT_STATUSES.TRANSLATED ?
+           (
+             <div className="pdf-container flex-1">
             <div className="pdf-header"></div>
             
             <div className="pdf-preview flex-row p-16 align-items-center justify-content-center position-relative">
@@ -252,7 +260,10 @@ const DocumentDetail = () => {
              
             </div>
           </div>
-          : <div className="pdf-container flex-1">
+           )
+          : documentDetail?.translationStatus===DOCUMENT_STATUSES.IDLE ?
+           (
+            <div className="pdf-container flex-1">
             <div className="pdf-header"></div>
             <div style={{height:'80%'}} className="pdf-preview flex-column p-16 align-items-center justify-content-space-around position-relative">
              <div style={{color:'#1d1f76'}} className="flex-row gap-4 align-items-center">
@@ -261,12 +272,60 @@ const DocumentDetail = () => {
              </div>
           <div
            onClick={handleTranslatePdf}
+           disabled={documentDetail.translationStatus== DOCUMENT_STATUSES.TRANSLATING}
            className="translate-pdf-btn px-20 py-12 flex-row align-items-center justify-content-space-between gap-8"> 
             <i class="fa-solid fa-language"></i> 
-            <p>{translatingPdf ? "Translating..." : "Translate PDF"}</p>
+            <p>{documentDetail.translationStatus== DOCUMENT_STATUSES.TRANSLATING ? "Translating..." : "Translate PDF"}</p>
           </div>
             </div>
           </div>
+          ): documentDetail?.translationStatus=== DOCUMENT_STATUSES.TRANSLATION_FAILED ?
+           (
+             <div className="pdf-container flex-1">
+            <div className="pdf-header"></div>
+              {/* original PDF  Content */}
+            <div style={{height:'100%'}} className="pdf-preview flex-row p-16 align-items-center justify-content-center position-relative">
+              <div style={{height:'90%'}} className="flex-row gap-24 full-width">
+<div className="flex-1 flex-column gap-16 pdf-placeholder-container-mob">
+                  <div  className="pdf-placeholder flex-column gap-8">
+                   <div className="flex-column gap-24">
+                     <i style={{color:'rgb(220 28 28)'}} class="fa-solid fa-circle-exclamation fa-4x"></i>
+                    <p className="xetgo-font-caption bolder">Error Translating Document</p>
+                   </div>
+                    <p className="xetgo-font-button" style={{ color: '#64748b' }}>
+                      Due to Exccessive use of token
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              
+              
+             
+            </div>
+          </div> 
+         ):
+          (
+            <div className="pdf-container flex-1">
+            <div className="pdf-header"></div>
+              {/* original PDF  Content */}
+            <div style={{height:'100%'}} className="pdf-preview flex-row p-16 align-items-center justify-content-center position-relative">
+              <div style={{height:'90%'}} className="flex-row gap-24 full-width">
+<div className="flex-1 flex-column gap-16 pdf-placeholder-container-mob">
+                  <div  className="pdf-placeholder flex-column gap-8">
+                   <div className="flex-column gap-24 align-items-center justify-content-center">
+                     {/* <i class="fa-solid fa-spinner fa-4x small-loader"></i> */}
+                     <div className="rotating-loader"></div>
+                    <p className="xetgo-font-caption bolder"> Translating Document</p>
+                   </div>
+                   
+                  </div>
+                </div>
+              </div>
+             
+            </div>
+          </div> 
+          )
           }
            
         </div>
@@ -283,27 +342,23 @@ const DocumentDetail = () => {
               </div>
             </div>
             <div className="card-content">
-              {documentDetail?.summary ? (
+              {documentDetail?.summary || documentDetail.summaryStatus===DOCUMENT_STATUSES.SUMMARY_FAILED ? (
                 <>
                   <div className="data-source-info">
                     <span className=" xetgo-font-caption bolder">Source: </span>
                     <span className="source-badge xetgo-font-caption bolder">
-                      {/* {documentDetail?.summarySource === "translated" ? "Translated PDF" : "Original Document"} */}
-                      Translated pdf
+                      {documentDetail?.summarySource === "translated" ? "Translated PDF" : documentDetail.summaryStatus===DOCUMENT_STATUSES.SUMMARY_FAILED?'Sample Data' : "Original Document"}
                     </span>
                   </div>
                   <div className="summary-content">
                     <div className="summary-text">
-                      {/* {documentDetail.summary.split('\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))} */}
-                      {documentDetail.summary.split('\n').map((paragraph, index) => (
+                      {summaryText.split('\n').map((paragraph, index) => (
                         <p key={index}>{paragraph}</p>
                       ))}
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : documentDetail.summaryStatus=== DOCUMENT_STATUSES.IDLE || documentDetail.summaryStatus===DOCUMENT_STATUSES.SUMMARIZING ?(
                 <div className="generation-status flex-column gap-8">
                   <i style={{color:'#64748b'}} class="fa-solid fa-file-circle-minus fa-2x"></i>
                   <p className="xetgo-font-button">
@@ -311,14 +366,15 @@ const DocumentDetail = () => {
                       ? "Summary not generated. Generate from translated PDF?"
                       : "Summary not generated. Generate from original PDF?"}
                   </p>
-                  <div 
+                  <button 
                     className="generate-btn xetgo-font-button bolder px-24 py-12 bold cursor-pointer flex-row align-items-center justify-content-center gap-8"
                     onClick={handleGenerateSummary}
+                    disabled={documentDetail.summaryStatus===DOCUMENT_STATUSES.SUMMARIZING}
                   >
                    
-                    {generatingSummary ? (
+                    {documentDetail.summaryStatus===DOCUMENT_STATUSES.SUMMARIZING ? (
                       <>
-                        <div className="btn-spinner" style={{ marginRight: '8px' }}></div>
+                        <div  className="btn-spinner" style={{ marginRight: '8px' }}></div>
                         Generating Summary...
                       </>
                     ) : (
@@ -327,9 +383,9 @@ const DocumentDetail = () => {
                        <p> Generate Summary</p>
                       </>
                     )}
-                  </div>
+                  </button>
                 </div>
-              )}
+              ):<p className="flex-">Summarise failed</p>}
             </div>
           </div>
 
@@ -342,12 +398,12 @@ const DocumentDetail = () => {
     </div>
   </div>
   <div className="card-content scrollable">
-    {documentDetail.extractedJson ? (
+    {documentDetail.extractedJson || documentDetail.extractionStatus === DOCUMENT_STATUSES.EXTRACTION_FAILED ? (
       <>
         <div className="data-source-info">
           <span className=" xetgo-font-caption bolder">Extracted from: </span>
           <span className="source-badge xetgo-font-caption bolder">
-            {"translated" === "translated" ? " Translated PDF" : " Original Document"}
+            {documentDetail?.extractedJson ?'Document':  'Sample Data'}
           </span>
         </div>
         <div className="transactions-content">
@@ -359,11 +415,10 @@ const DocumentDetail = () => {
               </tr>
             </thead>
             <tbody>
-              { documentDetail?.extractedJson &&
-    typeof documentDetail.extractedJson === "object" && Object.entries(documentDetail.extractedJson).map(([key,value]) => (
+              { extractedData && Object.entries(extractedData).map(([key,value]) => (
                 <tr key={key}>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div  className="flex-row align-items-center gap-8">
                       <i class="fa-solid fa-angle-right"></i>
                       {key}
                     </div>
@@ -387,15 +442,17 @@ const DocumentDetail = () => {
             ? "Data not extracted yet. Extract from translated PDF?"
             : "Data not extracted yet. Extract from original document?"}
         </p>
-        <div 
+        <button 
           className="generate-btn xetgo-font-button bolder px-24 py-12 bold cursor-pointer flex-row align-items-center justify-content-center gap-8"
          onClick={handleExtractData}
+         disabled={documentDetail.extractionStatus === DOCUMENT_STATUSES.EXTRACTING}
         >
-          <>
-            <i class="fa-regular fa-note-sticky"></i>
-            Extract Data
-          </>
-        </div>
+        {documentDetail.extractionStatus === DOCUMENT_STATUSES.EXTRACTING  ?<>
+        <div  className="btn-spinner" style={{ marginRight: '8px' }}></div>
+                        <p>Extracting Data...</p>
+        </>:<>  <i class="fa-regular fa-note-sticky"></i>
+             Extract Data</>}
+        </button>
       </div>
     )}
   </div>

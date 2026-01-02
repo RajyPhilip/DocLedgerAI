@@ -15,5 +15,8 @@ exports.documents = pgTable("documents", {
 
   translatedFileUrl: text("translated_file_url"),
   status: text("status").default("UPLOADED"),
+  translationStatus: text("translation_status").default("idle"),
+  summaryStatus: text("summary_status").default("idle"),
+  extractionStatus: text("extraction_status").default("idle"),
   createdAt: timestamp("created_at").defaultNow(),
 });

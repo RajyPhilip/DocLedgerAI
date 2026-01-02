@@ -84,6 +84,7 @@
           }
         }
       }
+       
       }
     }
 
@@ -274,56 +275,27 @@
 }
 
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+
 
 }
     }
 
   }
+
+ .rotating-loader {
+    width: 70px;
+    height: 70px;
+    border: 3px solid rgba(0, 123, 255, 0.2);
+    border-top-color: #2b1f90;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+ }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 }
-
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  // .document-header {
-  //   flex-direction: column;
-  //   gap: 16px;
-  //   align-items: flex-start;
-  // }
-
-  .document-detail-main-page .document-detail-lower-main-container .pdf-section .pdf-container .pdf-preview .pdf-actions .action-btn{
-    padding: 10px;
-  }
-  .pdf-placeholder-container-mob {
-    height: 350px;
-  }
-  
-  .pdf-section {
-    flex-direction: column;
-  }
-  .content-grid {
-    flex-direction: column;
-  }
-  
-  // .pdf-container .pdf-preview {
-  //   height: 400px;
-  // }
-  
-  // .card .card-content {
-  //   padding: 16px;
-  // }
-  
-  // .transactions-content .transactions-table {
-  //   display: block;
-  //   overflow-x: auto;
-  // }
-}
-
-
-
-
 .generate-btn {
   padding: 12px 24px;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -387,3 +359,47 @@
     transform: translateX(2px);
   }
 }
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  // .document-header {
+  //   flex-direction: column;
+  //   gap: 16px;
+  //   align-items: flex-start;
+  // }
+
+  .document-detail-main-page .document-detail-lower-main-container .pdf-section .pdf-container .pdf-preview .pdf-actions .action-btn{
+    padding: 10px;
+  }
+  .pdf-placeholder-container-mob {
+    height: 350px;
+  }
+  
+  .pdf-section {
+    flex-direction: column;
+  }
+  .content-grid {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .document-detail-main-page {
+    .document-detail-lower-main-container {
+      .content-grid {
+        display: grid;
+        .card {
+          .card-content {
+            max-height: unset;
+          }
+          .card-content.scrollable {
+            max-height: unset;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
