@@ -30,7 +30,7 @@ exports.extractStructuredData = async (rawText) => {
   let retryDelay = 20000;
 
   for (let i = 0; i < chunks.length; i++) {
-    console.log(`📦 Extracting data from chunk ${i + 1}/${chunks.length}`);
+    console.log(`Extracting data from chunk ${i + 1}/${chunks.length}`);
 
     const prompt = `
 You are a legal document data extraction engine.
@@ -73,14 +73,14 @@ ${chunks[i]}
       return JSON.parse(cleanJson);
 
     } catch (err) {
-      console.error("❌ Extraction error:", err.message);
+      console.error("Extraction error:", err.message);
 
       if (
         err.message.includes("429") ||
         err.message.includes("Quota") ||
         err.message.includes("rate")
       ) {
-        console.log(`⏳ Rate limit hit. Waiting ${retryDelay / 1000}s`);
+        console.log(`Rate limit hit. Waiting ${retryDelay / 1000}s`);
         await sleep(retryDelay);
         retryDelay *= 2;
         i--; // retry same chunk

@@ -13,7 +13,7 @@ exports.translateTamilToEnglish = async (textChunks) => {
   let retryDelay = 20000; // Start with 20 seconds
 
   for (let i = 0; i < textChunks.length; i++) {
-    console.log(`🌍 Translating chunk ${i + 1}/${textChunks.length}`);
+    console.log(`Translating chunk ${i + 1}/${textChunks.length}`);
 
     try {
       const result = await model.generateContent(
@@ -32,7 +32,7 @@ exports.translateTamilToEnglish = async (textChunks) => {
       }
       
     } catch (error) {
-      console.error(`❌ Error in chunk ${i + 1}:`, error.message);
+      console.error(`Error in chunk ${i + 1}:`, error.message);
 
       if (error.message.includes("429") || error.message.includes("Quota")) {
         console.log(`Rate limit hit. Waiting ${retryDelay / 1000} seconds...`);
@@ -40,7 +40,7 @@ exports.translateTamilToEnglish = async (textChunks) => {
         retryDelay *= 2; 
         i--; // Retry
       } else if (error.message.includes("404")) {
-          console.error("⛔ Model version error. Please ensure you are using 'gemini-2.5-flash' or 'gemini-3-flash-preview'.");
+          console.error("Model version error. Please ensure you are using 'gemini-2.5-flash' or 'gemini-3-flash-preview'.");
           break;
       }
     }

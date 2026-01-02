@@ -11,7 +11,7 @@ exports.uploadPdf = (buffer, fileName) => {
     cloudinary.uploader
       .upload_stream(
         {
-          resource_type: "raw", // ✅ PDFs must be raw
+          resource_type: "raw", // PDFs must be raw
           folder: "docledger_documents",
           public_id: fileName.replace(/\.pdf$/i, ""),
           format: "pdf",

@@ -20,7 +20,7 @@ exports.generateSummary = async (rawText) => {
   let retryDelay = 20000;
 
   for (let i = 0; i < chunks.length; i++) {
-    console.log(`🧠 Summarizing chunk ${i + 1}/${chunks.length}`);
+    console.log(`Summarizing chunk ${i + 1}/${chunks.length}`);
 
     const prompt = `
 You are a legal document summarization expert.
@@ -49,7 +49,7 @@ ${chunks[i]}
 
       retryDelay = 20000; // reset after success
     } catch (err) {
-      console.error("❌ Gemini summarization error:", err.message);
+      console.error("Gemini summarization error:", err.message);
 
       // Only retry / fallback on quota
       if (
@@ -57,7 +57,7 @@ ${chunks[i]}
         err.message.includes("Quota") ||
         err.message.includes("rate")
       ) {
-        console.log(`⏳ Rate limit hit. Waiting ${retryDelay / 1000}s`);
+        console.log(`Rate limit hit. Waiting ${retryDelay / 1000}s`);
         await sleep(retryDelay);
         retryDelay *= 2;
         i--; // retry same chunk

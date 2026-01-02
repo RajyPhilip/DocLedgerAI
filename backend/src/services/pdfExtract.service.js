@@ -22,7 +22,7 @@ exports.extractTextFromPdf = async (pdfUrl) => {
       .trim();
 
   } catch (err) {
-    console.error("❌ PDF extraction failed:", err.message);
+    console.error("PDF extraction failed:", err.message);
     throw new Error("Failed to extract PDF text");
   }
 };
